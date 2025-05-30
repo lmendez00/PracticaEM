@@ -1,6 +1,7 @@
 using System;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
     public class UIManager : MonoBehaviour
     {
@@ -28,8 +29,14 @@ using UnityEngine;
 
         void StartButtons()
         {
-            if (GUILayout.Button("Host")) m_NetworkManager.StartHost();
-            if (GUILayout.Button("Client")) m_NetworkManager.StartClient();
+        if (GUILayout.Button("Host"))
+        {
+            m_NetworkManager.StartHost();
+
+            //SceneManager.LoadScene("MenuScene");
+            m_NetworkManager.SceneManager.LoadScene("MenuScene", LoadSceneMode.Single);
+        }
+        if (GUILayout.Button("Client")) m_NetworkManager.StartClient();
             if (GUILayout.Button("Server")) m_NetworkManager.StartServer();
         }
 
