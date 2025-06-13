@@ -1,9 +1,7 @@
-// PLAYERMANAGER DEL PROYECTO
 using TMPro;
-using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerController : NetworkBehaviour
+public class PlayerController : MonoBehaviour
 {
     private TextMeshProUGUI coinText;
 
@@ -25,9 +23,6 @@ public class PlayerController : NetworkBehaviour
 
     void Start()
     {
-
-        if (!IsOwner) return;
-
         // Buscar el objeto "CanvasPlayer" en la escena
         GameObject canvas = GameObject.Find("CanvasPlayer");
 
@@ -51,43 +46,17 @@ public class PlayerController : NetworkBehaviour
         UpdateCoinUI();
     }
 
-    /*
-    public override void OnNetworkSpawn()
-    {
-        if (IsOwner)
-        {
-            InitializeOwner();
-
-            base.OnNetworkSpawn();
-        }
-    }
-
-    void InitializeOwner()
-    {
-        // GetComponent<PlayerInput>().enabled = true;
-        Debug.Log("Player iniciado como dueño local: " + uniqueID);
-    }
-    */
-
     void Update()
     {
         // Leer entrada del teclado
         horizontalInput = Input.GetAxis("Horizontal");
         verticalInput = Input.GetAxis("Vertical");
-        OnMoveRpc(horizontalInput, verticalInput);
 
-        if (!IsServer || !IsSpawned) return;  // Probar luego si poner delante de los inputs (?)
-
-        if (IsOwner)
-        {
-            // Mover el jugador
-            MovePlayer();
-        }
-
+        // Mover el jugador
+        MovePlayer();
 
         // Manejar las animaciones del jugador
         HandleAnimations();
-
     }
 
     void MovePlayer()
@@ -135,17 +104,5 @@ public class PlayerController : NetworkBehaviour
             coinText.text = $"{CoinsCollected}";
         }
     }
-
-    ////////////////////////////////
-
-    [Rpc(SendTo.Server)]    // Manda las actualizaciones al servidor (!!!)
-
-    public void OnMoveRpc(float h_input, float v_input)
-    {
-        horizontalInput = h_input;
-        verticalInput = v_input;
-    }
 }
-
-
 

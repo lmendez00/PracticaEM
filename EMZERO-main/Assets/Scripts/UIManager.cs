@@ -22,15 +22,13 @@ public class UIManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
-    /*public void CrearPartida()
+    public void CrearPartida()
     {
         m_NetworkManager.StartHost();
 
         //SceneManager.LoadScene("MenuScene");
         m_NetworkManager.SceneManager.LoadScene("MenuScene", LoadSceneMode.Single);
     }
-    
 
     public void EntrarPartida()
     {
@@ -40,9 +38,8 @@ public class UIManager : MonoBehaviour
         //m_NetworkManager.SceneManager.LoadScene("MenuScene", LoadSceneMode.Single);
 
     }
-    */
 
-    
+    /*
     void OnGUI()
     {
         GUILayout.BeginArea(new Rect(10, 10, 300, 300));
@@ -80,5 +77,5 @@ public class UIManager : MonoBehaviour
             m_NetworkManager.NetworkConfig.NetworkTransport.GetType().Name);
         GUILayout.Label("Mode: " + mode);
     }
-    
+    */
 }
