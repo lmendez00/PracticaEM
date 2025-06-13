@@ -907,7 +907,7 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 1314752083}
-    PlayerPrefab: {fileID: 8947290730586645348, guid: cb4f2926f9ddb634fb81430a923273a9, type: 3}
+    PlayerPrefab: {fileID: 0}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: 42ed92d9adc76f347a014bbbe83e607c, type: 2}
@@ -952,6 +952,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -5510014842496214420, guid: 42625083221c5f4428e9a69d2f9deef2, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 3993350557
+      objectReference: {fileID: 0}
+    - target: {fileID: -5510014842496214420, guid: 42625083221c5f4428e9a69d2f9deef2, type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 1423642876
+      objectReference: {fileID: 0}
     - target: {fileID: 3579194472530233805, guid: 42625083221c5f4428e9a69d2f9deef2, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.563
@@ -1016,6 +1024,14 @@ PrefabInstance:
     - target: {fileID: 742140873175737262, guid: 7a620c226d1e89342a76dc82f0b0e87c, type: 3}
       propertyPath: m_LocalPosition.z
       value: -3.224
+      objectReference: {fileID: 0}
+    - target: {fileID: 4322325551496011968, guid: 7a620c226d1e89342a76dc82f0b0e87c, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 3706684112
+      objectReference: {fileID: 0}
+    - target: {fileID: 4322325551496011968, guid: 7a620c226d1e89342a76dc82f0b0e87c, type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 1186373015
       objectReference: {fileID: 0}
     - target: {fileID: 7253055889444939717, guid: 7a620c226d1e89342a76dc82f0b0e87c, type: 3}
       propertyPath: m_LocalPosition.x

@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Unity.Netcode;
 
 /// <summary>
 /// Clase para generar el nivel del juego, incluyendo suelos, paredes, ítems decorativos, monedas y el borde exterior.
 /// </summary>
-public class LevelBuilder : MonoBehaviour
+public class LevelBuilder : NetworkBehaviour
 {
     #region Properties
 
@@ -73,6 +74,8 @@ public class LevelBuilder : MonoBehaviour
 
     public void Build()
     {
+        //Debug.Log($"Build ejecutado. IsServer: {IsServer}, IsClient: {IsClient}, IsHost: {IsHost}");
+        //if (!IsServer) return;
         CreateRooms(roomWidth, roomLength, numberOfRooms);
     }
 

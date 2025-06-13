@@ -4,6 +4,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Unity.Netcode;
 
 public enum GameMode
 {
@@ -11,7 +12,7 @@ public enum GameMode
     Monedas
 }
 
-public class LevelManager : MonoBehaviour
+public class LevelManager : NetworkBehaviour
 {
     #region Properties
 
@@ -315,6 +316,8 @@ public class LevelManager : MonoBehaviour
             Debug.Log($"Instanciando jugador en {spawnPosition}");
             // Crear una instancia del prefab en el punto especificado
             GameObject player = Instantiate(prefab, spawnPosition, Quaternion.identity);
+            //Para sincronizar los players en todos los clientes
+            player.GetComponent<NetworkObject>().Spawn();
             player.tag = "Player";
 
             // Obtener la referencia a la cámara principal
