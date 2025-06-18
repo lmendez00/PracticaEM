@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
 
 /// <summary>
@@ -73,6 +74,8 @@ public class LevelBuilder : MonoBehaviour
 
     public void Build()
     {
+        //////////
+        if (!NetworkManager.Singleton.IsServer) return;
         CreateRooms(roomWidth, roomLength, numberOfRooms);
     }
 
@@ -212,8 +215,19 @@ public class LevelBuilder : MonoBehaviour
     /// </summary>
     private void PlaceElement(GameObject prefab, float x, float z, Quaternion rotation)
     {
+        //Vector3 position = new Vector3(x, 0, z);
+        //Instantiate(prefab, position, rotation, roomParent);
         Vector3 position = new Vector3(x, 0, z);
-        Instantiate(prefab, position, rotation, roomParent);
+        GameObject obj = Instantiate(prefab, position, rotation, roomParent);
+
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer)
+        {
+            NetworkObject netObj = obj.GetComponent<NetworkObject>();
+            if (netObj != null)
+            {
+                netObj.Spawn();
+            }
+        }
     }
 
     /// <summary>

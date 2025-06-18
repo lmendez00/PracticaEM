@@ -51,7 +51,7 @@ public class PlayerController : NetworkBehaviour
         UpdateCoinUI();
     }
 
-    /*
+    
     public override void OnNetworkSpawn()
     {
         if (IsOwner)
@@ -67,7 +67,7 @@ public class PlayerController : NetworkBehaviour
         // GetComponent<PlayerInput>().enabled = true;
         Debug.Log("Player iniciado como dueño local: " + uniqueID);
     }
-    */
+    
 
     void Update()
     {

@@ -1,18 +1,37 @@
 using System.Collections;
-using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+public class GameManager : NetworkBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private LevelBuilder levelBuilder;
+
+    public override void OnNetworkSpawn()
     {
-        
+        if (IsServer)
+        {
+            StartCoroutine(WaitForSceneLoadThenBuild());
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private IEnumerator WaitForSceneLoadThenBuild()
     {
-        
+        // Esperar a que la escena esté completamente cargada
+        yield return new WaitForSeconds(1f); // Ajustable según necesidad
+
+        levelBuilder = FindObjectOfType<LevelBuilder>();
+        if (levelBuilder != null)
+        {
+            levelBuilder.Build(); // Solo el servidor construye el mapa
+            NotifyClientsMapReadyClientRpc();
+        }
+    }
+
+    [ClientRpc]
+    void NotifyClientsMapReadyClientRpc()
+    {
+        Debug.Log("Mapa generado por el servidor. Cliente listo para jugar.");
+        // Aquí puedes activar un flag local si necesitas bloquear UI o controles hasta que esto llegue
     }
 }
+
