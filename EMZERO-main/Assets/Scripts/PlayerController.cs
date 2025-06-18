@@ -2,6 +2,7 @@
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
+// using UnityEngine.Windows;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -23,10 +24,17 @@ public class PlayerController : NetworkBehaviour
     private float horizontalInput;         // Entrada horizontal (A/D o flechas)
     private float verticalInput;           // Entrada vertical (W/S o flechas)
 
+    public NetworkVariable<bool> zombificados = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
+
+
     void Start()
     {
 
-        if (!IsOwner) return;
+        if (!IsOwner)
+        {
+            // this.GetComponent<PlayerController>().enabled = false;
+            enabled = false;
+        }
 
         // Buscar el objeto "CanvasPlayer" en la escena
         GameObject canvas = GameObject.Find("CanvasPlayer");
@@ -54,39 +62,32 @@ public class PlayerController : NetworkBehaviour
     
     public override void OnNetworkSpawn()
     {
-        if (IsOwner)
-        {
-            InitializeOwner();
-
-            base.OnNetworkSpawn();
-        }
+        base.OnNetworkSpawn();
     }
 
-    void InitializeOwner()
+    /*void InitializeOwner()
     {
         // GetComponent<PlayerInput>().enabled = true;
         Debug.Log("Player iniciado como dueño local: " + uniqueID);
-    }
+    }*/
     
 
     void Update()
     {
+        if (!IsSpawned || !IsOwner)
+        {
+            return;
+        }
+
         // Leer entrada del teclado
         horizontalInput = Input.GetAxis("Horizontal");
         verticalInput = Input.GetAxis("Vertical");
-        OnMoveRpc(horizontalInput, verticalInput);
 
-        if (!IsServer || !IsSpawned) return;  // Probar luego si poner delante de los inputs (?)
-
-        if (IsOwner)
-        {
-            // Mover el jugador
-            MovePlayer();
-        }
-
+        // Mover el jugador
+        MovePlayer();
 
         // Manejar las animaciones del jugador
-        HandleAnimations();
+        HandleAnimationsRpc(horizontalInput, verticalInput);
 
     }
 
@@ -110,10 +111,12 @@ public class PlayerController : NetworkBehaviour
 
             // Mover al jugador en la dirección deseada
             transform.Translate(moveDirection * adjustedSpeed * Time.deltaTime, Space.World);
+            OnMoveRpc(this.transform.position, this.transform.rotation);
         }
     }
 
-    void HandleAnimations()
+    [Rpc(SendTo.ClientsAndHost)]
+    void HandleAnimationsRpc(float horizontalInput, float verticalInput)
     {
         // Animaciones basadas en la dirección del movimiento
         animator.SetFloat("Speed", Mathf.Abs(horizontalInput) + Mathf.Abs(verticalInput));  // Controla el movimiento (caminar/correr)
@@ -138,12 +141,12 @@ public class PlayerController : NetworkBehaviour
 
     ////////////////////////////////
 
-    [Rpc(SendTo.Server)]    // Manda las actualizaciones al servidor (!!!)
-
-    public void OnMoveRpc(float h_input, float v_input)
+    // [Rpc(SendTo.Server)]    // Manda las actualizaciones al servidor (!!!)
+    [Rpc(SendTo.ClientsAndHost)]
+    public void OnMoveRpc(Vector3 playerTransform, Quaternion playerRotation)
     {
-        horizontalInput = h_input;
-        verticalInput = v_input;
+        this.transform.position = playerTransform;
+        this.transform.rotation = playerRotation;
     }
 }
 

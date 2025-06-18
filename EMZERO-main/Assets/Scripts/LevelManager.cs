@@ -4,6 +4,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Unity.Netcode;
 
 public enum GameMode
 {
@@ -11,7 +12,7 @@ public enum GameMode
     Monedas
 }
 
-public class LevelManager : MonoBehaviour
+public class LevelManager : NetworkBehaviour
 {
     #region Properties
 
@@ -105,6 +106,16 @@ public class LevelManager : MonoBehaviour
                 {
                     gameModeText = gameModeTextTransform.GetComponent<TextMeshProUGUI>();
                 }
+
+                // CONDICIONES DE VICTORIA O DERROTA
+                /*if (victoriaText != null)
+                {
+                    victoriaText = panel.Find("Victoria").GetComponent<TextMeshProUGUI>();
+                    victoriaText.enabled = false;
+                }
+
+                // etc
+                */
             }
         }
 
@@ -192,11 +203,20 @@ public class LevelManager : MonoBehaviour
             Quaternion playerRotation = human.transform.rotation;
             string uniqueID = human.GetComponent<PlayerController>().uniqueID;
 
-            // Destruir el humano actual
-            Destroy(human);
+            ulong id = human.GetComponent<NetworkObject>().OwnerClientId;
+            // string playerName = GetPlayerName(id); // Ellos usan instancia de GameManager
+
+            human.GetComponent<NetworkObject>().Despawn();
+
+            // Destruir el humano actual (cambiar a despawn!!!)
+            // Destroy(human);
 
             // Instanciar el prefab del zombie en la misma posición y rotación
             GameObject zombie = Instantiate(zombiePrefab, playerPosition, playerRotation);
+            zombie.GetComponent<NetworkObject>().SpawnAsPlayerObject(id);
+            zombie.GetComponent<PlayerController>().OnNetworkSpawn();
+            // zombie.GetComponent<PlayerController>().name = playerName;
+
             if (enabled) { zombie.tag = "Player"; }
 
             // Obtener el componente PlayerController del zombie instanciado
@@ -208,6 +228,13 @@ public class LevelManager : MonoBehaviour
                 playerController.uniqueID = uniqueID; // Mantener el identificador único
                 numberOfHumans--; // Reducir el número de humanos
                 numberOfZombies++; // Aumentar el número de zombis
+
+                if (numberOfHumans == 0)
+                {
+                    //ZombiesVictoryRpc(id);
+                }
+
+                //UpdateHumansZombiesClientRpc(numberOfHumans, numberOfZombies);
                 UpdateTeamUI();
 
                 if (enabled)
@@ -290,6 +317,9 @@ public class LevelManager : MonoBehaviour
                     playerController.isZombie = false; // Cambiar el estado a humano
                     numberOfHumans++; // Aumentar el número de humanos
                     numberOfZombies--; // Reducir el número de zombis
+
+                    //UpdateHumansZombiesClientRpc(numberOfHumans, numberOfZombies);
+                    UpdateTeamUI();
                 }
                 else
                 {
@@ -335,6 +365,7 @@ public class LevelManager : MonoBehaviour
                 Debug.Log($"Cámara principal encontrada en {mainCamera}");
                 // Obtener el componente PlayerController del jugador instanciado
                 playerController = player.GetComponent<PlayerController>();
+
                 // Asignar el transform de la cámara al PlayerController
                 if (playerController != null)
                 {
