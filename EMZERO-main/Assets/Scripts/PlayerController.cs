@@ -16,13 +16,13 @@ public class PlayerController : NetworkBehaviour
     public string uniqueID; // Añadir una propiedad para el identificador único
 
     [Header("Movement Settings")]
-    public float moveSpeed = 5f;           // Velocidad de movimiento
-    public float zombieSpeedModifier = 0.8f; // Modificador de velocidad para zombies
-    public Animator animator;              // Referencia al Animator
-    public Transform cameraTransform;      // Referencia a la cámara
+    public float moveSpeed = 5f;                // Velocidad de movimiento
+    public float zombieSpeedModifier = 0.8f;    // Modificador de velocidad para zombies
+    public Animator animator;                   // Referencia al Animator
+    public Transform cameraTransform;           // Referencia a la cámara
 
-    private float horizontalInput;         // Entrada horizontal (A/D o flechas)
-    private float verticalInput;           // Entrada vertical (W/S o flechas)
+    private float horizontalInput;              // Entrada horizontal (A/D o flechas)
+    private float verticalInput;                // Entrada vertical (W/S o flechas)
 
     public NetworkVariable<bool> zombificados = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
 

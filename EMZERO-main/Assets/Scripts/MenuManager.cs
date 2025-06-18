@@ -1,7 +1,8 @@
 using UnityEngine;
+using Unity.Netcode;
 using UnityEngine.SceneManagement;
 
-public class MenuManager : MonoBehaviour
+public class MenuManager : NetworkBehaviour
 {
     public void Awake()
     {
@@ -10,7 +11,13 @@ public class MenuManager : MonoBehaviour
 
     public void StartGame()
     {
-        SceneManager.LoadScene("GameScene"); // Cambia "MainScene" por el nombre de tu escena principal
+        var allPlayers = GameObject.FindGameObjectsWithTag("Player");
+        foreach (var player in allPlayers)
+        {
+            player.GetComponent<NetworkObject>().Despawn();
+        }
+
+        NetworkManager.Singleton.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
     public void QuitGame()

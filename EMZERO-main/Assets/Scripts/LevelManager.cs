@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Unity.Netcode;
 
 public enum GameMode
 {
@@ -12,7 +12,7 @@ public enum GameMode
     Monedas
 }
 
-public class LevelManager : NetworkBehaviour
+public class LevelManager : MonoBehaviour
 {
     #region Properties
 
@@ -106,16 +106,6 @@ public class LevelManager : NetworkBehaviour
                 {
                     gameModeText = gameModeTextTransform.GetComponent<TextMeshProUGUI>();
                 }
-
-                // CONDICIONES DE VICTORIA O DERROTA
-                /*if (victoriaText != null)
-                {
-                    victoriaText = panel.Find("Victoria").GetComponent<TextMeshProUGUI>();
-                    victoriaText.enabled = false;
-                }
-
-                // etc
-                */
             }
         }
 
@@ -131,7 +121,7 @@ public class LevelManager : NetworkBehaviour
         }
 
         SpawnTeams();
-        
+
         UpdateTeamUI();
     }
 
@@ -203,20 +193,11 @@ public class LevelManager : NetworkBehaviour
             Quaternion playerRotation = human.transform.rotation;
             string uniqueID = human.GetComponent<PlayerController>().uniqueID;
 
-            ulong id = human.GetComponent<NetworkObject>().OwnerClientId;
-            // string playerName = GetPlayerName(id); // Ellos usan instancia de GameManager
-
-            human.GetComponent<NetworkObject>().Despawn();
-
-            // Destruir el humano actual (cambiar a despawn!!!)
-            // Destroy(human);
+            // Destruir el humano actual
+            Destroy(human);
 
             // Instanciar el prefab del zombie en la misma posición y rotación
             GameObject zombie = Instantiate(zombiePrefab, playerPosition, playerRotation);
-            zombie.GetComponent<NetworkObject>().SpawnAsPlayerObject(id);
-            zombie.GetComponent<PlayerController>().OnNetworkSpawn();
-            // zombie.GetComponent<PlayerController>().name = playerName;
-
             if (enabled) { zombie.tag = "Player"; }
 
             // Obtener el componente PlayerController del zombie instanciado
@@ -228,13 +209,6 @@ public class LevelManager : NetworkBehaviour
                 playerController.uniqueID = uniqueID; // Mantener el identificador único
                 numberOfHumans--; // Reducir el número de humanos
                 numberOfZombies++; // Aumentar el número de zombis
-
-                if (numberOfHumans == 0)
-                {
-                    //ZombiesVictoryRpc(id);
-                }
-
-                //UpdateHumansZombiesClientRpc(numberOfHumans, numberOfZombies);
                 UpdateTeamUI();
 
                 if (enabled)
@@ -317,9 +291,6 @@ public class LevelManager : NetworkBehaviour
                     playerController.isZombie = false; // Cambiar el estado a humano
                     numberOfHumans++; // Aumentar el número de humanos
                     numberOfZombies--; // Reducir el número de zombis
-
-                    //UpdateHumansZombiesClientRpc(numberOfHumans, numberOfZombies);
-                    UpdateTeamUI();
                 }
                 else
                 {
@@ -345,6 +316,7 @@ public class LevelManager : NetworkBehaviour
             Debug.Log($"Instanciando jugador en {spawnPosition}");
             // Crear una instancia del prefab en el punto especificado
             GameObject player = Instantiate(prefab, spawnPosition, Quaternion.identity);
+            player.GetComponent<NetworkObject>().Spawn();
             player.tag = "Player";
 
             // Obtener la referencia a la cámara principal
@@ -365,7 +337,6 @@ public class LevelManager : NetworkBehaviour
                 Debug.Log($"Cámara principal encontrada en {mainCamera}");
                 // Obtener el componente PlayerController del jugador instanciado
                 playerController = player.GetComponent<PlayerController>();
-
                 // Asignar el transform de la cámara al PlayerController
                 if (playerController != null)
                 {
@@ -516,7 +487,3 @@ public class LevelManager : NetworkBehaviour
     #endregion
 
 }
-
-
-
-
