@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using Unity.Netcode;
+// using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,7 +13,7 @@ public enum GameMode
     Monedas
 }
 
-public class LevelManager : MonoBehaviour
+public class LevelManager : NetworkBehaviour
 {
     #region Properties
 
@@ -308,19 +309,40 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    private void SpawnPlayer(Vector3 spawnPosition, GameObject prefab)
+    private void SpawnPlayer(Vector3 spawnPosition, GameObject prefab, ulong clientId)
     {
-        Debug.Log($"Instanciando jugador en {spawnPosition}");
+
+        //////////////////////////////// INTENTO DE SPAWN DE JUGADORES /////////////////////////
+
+
+        //Debug.Log($"Instanciando jugador en {spawnPosition}");
         if (prefab != null)
         {
             Debug.Log($"Instanciando jugador en {spawnPosition}");
             // Crear una instancia del prefab en el punto especificado
-            GameObject player = Instantiate(prefab, spawnPosition, Quaternion.identity);
-            player.GetComponent<NetworkObject>().Spawn();
+
+
+            // Verifica si el jugador ya existe en el diccionario
+            if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
+            {
+                // Si ya tiene un objeto de jugador, no hace nada
+                if (client.PlayerObject != null)
+                    return;
+            }
+            Debug.Log("Antes del Spawn: " + NetworkManager.Singleton.SpawnManager.SpawnedObjectsList.Count);
+            // Instancia el nuevo jugador y lo asigna al cliente
+            GameObject player = Instantiate(prefab, new Vector3(3,3,3), Quaternion.identity);
+            NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
+            playerNetworkObject.SpawnWithOwnership(clientId); // Asigna la propiedad al cliente
+
+            player.GetComponent<PlayerController>().OnNetworkSpawn();
+            //player.GetComponent<PlayerController>().networkName.Value = playerName; // Asigna el nombre del jugador
+            Debug.Log("Despues del Spawn: " + NetworkManager.Singleton.SpawnManager.SpawnedObjectsList.Count);
+
             player.tag = "Player";
 
             // Obtener la referencia a la cámara principal
-            Camera mainCamera = Camera.main;
+            Camera mainCamera = player.transform.GetChild(3).gameObject.GetComponent<Camera>();
 
             if (mainCamera != null)
             {
@@ -329,18 +351,18 @@ public class LevelManager : MonoBehaviour
 
                 if (cameraController != null)
                 {
-                    Debug.Log($"CameraController encontrado en la cámara principal.");
+                    //Debug.Log($"CameraController encontrado en la cámara principal.");
                     // Asignar el jugador al script CameraController
                     cameraController.player = player.transform;
                 }
 
-                Debug.Log($"Cámara principal encontrada en {mainCamera}");
+                //Debug.Log($"Cámara principal encontrada en {mainCamera}");
                 // Obtener el componente PlayerController del jugador instanciado
                 playerController = player.GetComponent<PlayerController>();
                 // Asignar el transform de la cámara al PlayerController
                 if (playerController != null)
                 {
-                    Debug.Log($"PlayerController encontrado en el jugador instanciado.");
+                    //Debug.Log($"PlayerController encontrado en el jugador instanciado.");
                     playerController.enabled = true;
                     playerController.cameraTransform = mainCamera.transform;
                     playerController.uniqueID = uniqueIdGenerator.GenerateUniqueID(); // Generar un identificador único
@@ -360,13 +382,22 @@ public class LevelManager : MonoBehaviour
         {
             Debug.LogError("Faltan referencias al prefab o al punto de aparición.");
         }
+
     }
 
     private void SpawnTeams()
     {
         Debug.Log("Instanciando equipos");
+        foreach (ulong id in NetworkManager.Singleton.ConnectedClientsIds)
+        {
+            if (IsHost)
+            {
+                SpawnPlayer(humanSpawnPoints[0], playerPrefab, id);
+            }
+        }
+
         if (humanSpawnPoints.Count <= 0) { return; }
-        SpawnPlayer(humanSpawnPoints[0], playerPrefab);
+       
         Debug.Log($"Personaje jugable instanciado en {humanSpawnPoints[0]}");
 
         for (int i = 1; i < numberOfHumans; i++)

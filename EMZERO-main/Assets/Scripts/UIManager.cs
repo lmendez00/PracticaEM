@@ -3,7 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class UIManager : MonoBehaviour
+public class UIManager : NetworkBehaviour
 {
     [SerializeField]
     NetworkManager m_NetworkManager;

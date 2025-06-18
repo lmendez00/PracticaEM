@@ -32,8 +32,8 @@ public class PlayerController : NetworkBehaviour
 
         if (!IsOwner)
         {
-            // this.GetComponent<PlayerController>().enabled = false;
-            enabled = false;
+            this.GetComponent<PlayerController>().enabled = false;
+            // enabled = false;
         }
 
         // Buscar el objeto "CanvasPlayer" en la escena
