@@ -75,7 +75,7 @@ public class LevelBuilder : MonoBehaviour
     public void Build()
     {
         //////////
-        if (!NetworkManager.Singleton.IsServer) return;
+        // if (!NetworkManager.Singleton.IsServer) return;
         CreateRooms(roomWidth, roomLength, numberOfRooms);
     }
 
