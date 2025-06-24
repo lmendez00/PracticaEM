@@ -79,11 +79,9 @@ public class LevelBuilder : MonoBehaviour
     {
 
         //////////
-<<<<<<< Updated upstream
         // if (!NetworkManager.Singleton.IsServer) return;
-=======
         if (!NetworkManager.Singleton.IsServer || hasBuilt) return;
->>>>>>> Stashed changes
+
         CreateRooms(roomWidth, roomLength, numberOfRooms);
 
         hasBuilt = true;
@@ -369,10 +367,3 @@ public class LevelBuilder : MonoBehaviour
 
     #endregion
 }
-
-
-
-
-
-
-

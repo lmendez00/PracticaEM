@@ -74,10 +74,10 @@ public class PlayerController : NetworkBehaviour
 
     void Update()
     {
-        if (!IsSpawned || !IsOwner)
-        {
-            return;
-        }
+        if (!IsOwner) return;
+
+        Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
+        Debug.DrawRay(rayOrigin, Vector3.down * 1f, Color.red);
 
         // Leer entrada del teclado
         horizontalInput = Input.GetAxis("Horizontal");
@@ -91,7 +91,7 @@ public class PlayerController : NetworkBehaviour
 
     }
 
-    void MovePlayer()
+    /*void MovePlayer()
     {
         if (cameraTransform == null) { return; }
 
@@ -111,13 +111,40 @@ public class PlayerController : NetworkBehaviour
 
             // Mover al jugador en la dirección deseada
             transform.Translate(moveDirection * adjustedSpeed * Time.deltaTime, Space.World);
-<<<<<<< Updated upstream
-            OnMoveRpc(this.transform.position, this.transform.rotation);
-=======
             //OnMoveRpc(this.transform.position, this.transform.rotation);
->>>>>>> Stashed changes
+        }
+    }*/
+
+    void MovePlayer()
+    {
+        if (cameraTransform == null) return;
+
+        // Calcular dirección en base a input + cámara
+        Vector3 moveDirection = (cameraTransform.forward * verticalInput + cameraTransform.right * horizontalInput).normalized;
+        moveDirection.y = 0f;
+
+        if (moveDirection != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+            float adjustedSpeed = isZombie ? moveSpeed * zombieSpeedModifier : moveSpeed;
+
+            // Calcular nueva posición y rotación
+            Vector3 newPosition = transform.position + moveDirection * adjustedSpeed * Time.deltaTime;
+            Quaternion newRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 720f * Time.deltaTime);
+
+            // Enviar al servidor
+            SubmitMovementServerRpc(newPosition, newRotation);
         }
     }
+    [ServerRpc]
+    void SubmitMovementServerRpc(Vector3 position, Quaternion rotation)
+    {
+        transform.position = position;
+        transform.rotation = rotation;
+    }
+    ///////
+    
+
 
     [Rpc(SendTo.ClientsAndHost)]
     void HandleAnimationsRpc(float horizontalInput, float verticalInput)
@@ -146,12 +173,12 @@ public class PlayerController : NetworkBehaviour
     ////////////////////////////////
 
     // [Rpc(SendTo.Server)]    // Manda las actualizaciones al servidor (!!!)
-    [Rpc(SendTo.ClientsAndHost)]
+    /*[Rpc(SendTo.ClientsAndHost)]
     public void OnMoveRpc(Vector3 playerTransform, Quaternion playerRotation)
     {
         this.transform.position = playerTransform;
         this.transform.rotation = playerRotation;
-    }
+    }*/
 }
 
 
