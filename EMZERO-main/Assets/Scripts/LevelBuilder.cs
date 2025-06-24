@@ -58,6 +58,9 @@ public class LevelBuilder : MonoBehaviour
     private HashSet<Vector3> humanSpawnPoints = new HashSet<Vector3>();
     private HashSet<Vector3> zombieSpawnPoints = new HashSet<Vector3>();
 
+    private bool hasBuilt = false;
+
+
     #endregion
 
     #region Unity game loop methods
@@ -74,9 +77,17 @@ public class LevelBuilder : MonoBehaviour
 
     public void Build()
     {
+
         //////////
+<<<<<<< Updated upstream
         // if (!NetworkManager.Singleton.IsServer) return;
+=======
+        if (!NetworkManager.Singleton.IsServer || hasBuilt) return;
+>>>>>>> Stashed changes
         CreateRooms(roomWidth, roomLength, numberOfRooms);
+
+        hasBuilt = true;
+
     }
 
     /// <summary>
@@ -145,8 +156,10 @@ public class LevelBuilder : MonoBehaviour
                 GameObject selectedFloorPrefab = floorPrefabs[randomIndex];
 
                 Vector3 tilePosition = new Vector3(x * tileSize + offsetX, 0, z * tileSize + offsetZ);
-                GameObject tile = Instantiate(selectedFloorPrefab, tilePosition, Quaternion.identity, roomParent);
-                tile.name = $"Tile_{x}_{z}";
+                //GameObject tile = Instantiate(selectedFloorPrefab, tilePosition, Quaternion.identity, roomParent);
+                //tile.name = $"Tile_{x}_{z}";
+                PlaceElement(selectedFloorPrefab, tilePosition.x, tilePosition.z, Quaternion.identity);
+
 
                 CreateDecorativeItem(x, z, width, length, tilePosition);
                 CreateCoin(x, z, width, length, tilePosition);

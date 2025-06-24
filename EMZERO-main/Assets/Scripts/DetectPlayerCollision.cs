@@ -20,4 +20,32 @@ public class DetectPlayerCollision : MonoBehaviour
         }
     }
 }
+/*
+using System.Collections;
+using Unity.Netcode;
+using UnityEngine;
 
+public class DetectPlayerCollision : NetworkBehaviour
+{
+    [SerializeField] private AudioClip pickupSound;
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!IsServer) return;
+
+        if (other.CompareTag("Player"))
+        {
+            PlayerController player = other.GetComponent<PlayerController>();
+            if (player != null && !player.isZombie)
+            {
+                GameManager.Instance.CollectCoinServerRpc(player.OwnerClientId);
+
+                //Destruir la moneda para todos
+                NetworkObject networkObject = GetComponent<NetworkObject>();
+                if (networkObject != null)
+                    networkObject.Despawn(true);
+            }
+        }
+    }
+}
+*/

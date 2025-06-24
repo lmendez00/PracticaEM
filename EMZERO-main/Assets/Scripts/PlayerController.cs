@@ -111,7 +111,11 @@ public class PlayerController : NetworkBehaviour
 
             // Mover al jugador en la dirección deseada
             transform.Translate(moveDirection * adjustedSpeed * Time.deltaTime, Space.World);
+<<<<<<< Updated upstream
             OnMoveRpc(this.transform.position, this.transform.rotation);
+=======
+            //OnMoveRpc(this.transform.position, this.transform.rotation);
+>>>>>>> Stashed changes
         }
     }
 
