@@ -113,12 +113,15 @@ public class LevelManager : NetworkBehaviour
         remainingSeconds = minutes * 60;
 
         // Obtener los puntos de aparición y el número de monedas generadas desde LevelBuilder
-        if (levelBuilder != null)
+        if (IsServer && levelBuilder != null)
         {
             levelBuilder.Build();
             humanSpawnPoints = levelBuilder.GetHumanSpawnPoints();
             zombieSpawnPoints = levelBuilder.GetZombieSpawnPoints();
             CoinsGenerated = levelBuilder.GetCoinsGenerated();
+
+            // Sincroniza con los clientes
+            SetCoinsGeneratedClientRpc(CoinsGenerated);
         }
 
         SpawnTeams();
@@ -446,6 +449,13 @@ public class LevelManager : NetworkBehaviour
         }
     }
 
+    [ClientRpc]
+    void SetCoinsGeneratedClientRpc(int totalCoins)
+    {
+        CoinsGenerated = totalCoins;
+    }
+
+
     #endregion
 
     #region Modo de juego
@@ -479,7 +489,7 @@ public class LevelManager : NetworkBehaviour
 
     private void HandleCoinBasedGameMode()
     {
-        if (isGameOver) return;
+        /*if (isGameOver) return;
 
         // Implementar la lógica para el modo de juego basado en monedas
         if (gameModeText != null && playerController != null)
@@ -488,6 +498,21 @@ public class LevelManager : NetworkBehaviour
             if (playerController.CoinsCollected == CoinsGenerated)
             {
                 isGameOver = true;
+            }
+        }*/
+        if (isGameOver) return;
+
+        if (gameModeText != null)
+        {
+            int totalRecogidas = GameManager.Instance.TotalCoinsCollected.Value;
+            int totalGeneradas = CoinsGenerated;
+
+            gameModeText.text = $"{totalRecogidas}/{totalGeneradas}";
+
+            if (totalRecogidas >= totalGeneradas)
+            {
+                isGameOver = true;
+                ShowGameOverPanel(); // o lanzar un ClientRpc
             }
         }
     }

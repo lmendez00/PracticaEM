@@ -8,20 +8,23 @@ public class GameManager : NetworkBehaviour
     public static GameManager Instance;
     private LevelBuilder levelBuilder;
 
-    private NetworkVariable<int> totalCoinsCollected = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<int> TotalCoinsCollected = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<int> PlayersConnected = new(writePerm: NetworkVariableWritePermission.Server);
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
+        else Destroy(gameObject);
     }
     public override void OnNetworkSpawn()
     {
         if (IsServer)
         {
-            StartCoroutine(WaitForSceneLoadThenBuild());
+            //StartCoroutine(WaitForSceneLoadThenBuild());
+            PlayersConnected.Value = NetworkManager.ConnectedClients.Count;
         }
     }
-
+    /*
     private IEnumerator WaitForSceneLoadThenBuild()
     {
         //Esperar a que la escena esté completamente cargada
@@ -33,6 +36,14 @@ public class GameManager : NetworkBehaviour
             levelBuilder.Build(); // Solo el servidor construye el mapa
             NotifyClientsMapReadyClientRpc();
         }
+    }*/
+
+    public void AddCoin()
+    {
+        if (IsServer)
+        {
+            TotalCoinsCollected.Value++;
+        }
     }
 
     [ClientRpc]
@@ -42,49 +53,3 @@ public class GameManager : NetworkBehaviour
         // Aquí puedes activar un flag local si necesitas bloquear UI o controles hasta que esto llegue
     }
 }
-/*
-using System.Collections;
-using Unity.Netcode;
-using UnityEngine;
-
-public class GameManager : NetworkBehaviour
-{
-    public static GameManager Instance;
-
-    public AudioClip pickupSound;
-
-    private NetworkVariable<int> totalCoinsCollected = new NetworkVariable<int>(
-        0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-
-    private void Awake()
-    {
-        if (Instance == null) Instance = this;
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    public void CollectCoinServerRpc(ulong clientId)
-    {
-        totalCoinsCollected.Value++;
-
-        // Notificar al cliente (puedes usar ClientRpc para efectos, sonidos, etc.)
-        NotifyCoinPickupClientRpc(clientId);
-    }
-
-    [ClientRpc]
-    private void NotifyCoinPickupClientRpc(ulong clientId)
-    {
-        if (NetworkManager.Singleton.LocalClientId == clientId)
-        {
-            // Solo el jugador que recogió escucha esto
-            AudioSource.PlayClipAtPoint(Resources.Load<AudioClip>("pickup"), Vector3.zero);
-        }
-    }
-
-    public int GetCoinCount()
-    {
-        return totalCoinsCollected.Value;
-    }
-}
-
-
-*/

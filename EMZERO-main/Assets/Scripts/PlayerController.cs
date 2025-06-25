@@ -155,13 +155,30 @@ public class PlayerController : NetworkBehaviour
 
     public void CoinCollected()
     {
-        if (!isZombie) // Solo los humanos pueden recoger monedas
+        if (!isZombie)
         {
-            this.CoinsCollected++;
-            UpdateCoinUI();
+            CoinsCollected++;
+
+            if (IsServer)
+            {
+                // Actualiza el contador en el servidor (opcional si sincronizas globalmente)
+                GameManager.Instance.AddCoin();
+
+                // Llama al RPC para actualizar el texto en el cliente dueño
+                UpdateCoinUIClientRpc(OwnerClientId, CoinsCollected);
+            }
         }
     }
 
+    [ClientRpc]
+    void UpdateCoinUIClientRpc(ulong targetClientId, int newValue)
+    {
+        if (IsOwner && NetworkManager.Singleton.LocalClientId == targetClientId)
+        {
+            CoinsCollected = newValue;
+            UpdateCoinUI();
+        }
+    }
     void UpdateCoinUI()
     {
         if (coinText != null)
@@ -169,6 +186,7 @@ public class PlayerController : NetworkBehaviour
             coinText.text = $"{CoinsCollected}";
         }
     }
+
 
     ////////////////////////////////
 
