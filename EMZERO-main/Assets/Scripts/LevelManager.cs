@@ -196,12 +196,16 @@ public class LevelManager : NetworkBehaviour
             Vector3 playerPosition = human.transform.position;
             Quaternion playerRotation = human.transform.rotation;
             string uniqueID = human.GetComponent<PlayerController>().uniqueID;
-
+            ulong id = human.GetComponent<NetworkObject>().OwnerClientId; 
             // Destruir el humano actual
-            Destroy(human);
+            human.GetComponent<NetworkObject>().Despawn();
+            //Destroy(human);
 
             // Instanciar el prefab del zombie en la misma posición y rotación
             GameObject zombie = Instantiate(zombiePrefab, playerPosition, playerRotation);
+            
+            zombie.GetComponent<NetworkObject>().SpawnAsPlayerObject(id);
+            
             if (enabled) { zombie.tag = "Player"; }
 
             // Obtener el componente PlayerController del zombie instanciado
