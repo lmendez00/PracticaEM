@@ -118,7 +118,7 @@ public class PlayerController : NetworkBehaviour
     void MovePlayer()
     {
         if (cameraTransform == null) return;
-
+        Debug.Log("Entra en Move");
         // Calcular dirección en base a input + cámara
         Vector3 moveDirection = (cameraTransform.forward * verticalInput + cameraTransform.right * horizontalInput).normalized;
         moveDirection.y = 0f;
@@ -127,7 +127,7 @@ public class PlayerController : NetworkBehaviour
         {
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
             float adjustedSpeed = isZombie ? moveSpeed * zombieSpeedModifier : moveSpeed;
-
+            Debug.Log("MovimientoBien");
             // Calcular nueva posición y rotación
             Vector3 newPosition = transform.position + moveDirection * adjustedSpeed * Time.deltaTime;
             Quaternion newRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 720f * Time.deltaTime);
@@ -136,9 +136,10 @@ public class PlayerController : NetworkBehaviour
             SubmitMovementServerRpc(newPosition, newRotation);
         }
     }
-    [ServerRpc]
+    [Rpc(SendTo.ClientsAndHost)]
     void SubmitMovementServerRpc(Vector3 position, Quaternion rotation)
     {
+        
         transform.position = position;
         transform.rotation = rotation;
     }
@@ -149,6 +150,7 @@ public class PlayerController : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     void HandleAnimationsRpc(float horizontalInput, float verticalInput)
     {
+        Debug.Log("Animaciones bien");
         // Animaciones basadas en la dirección del movimiento
         animator.SetFloat("Speed", Mathf.Abs(horizontalInput) + Mathf.Abs(verticalInput));  // Controla el movimiento (caminar/correr)
     }
