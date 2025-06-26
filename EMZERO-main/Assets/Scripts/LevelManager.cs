@@ -126,6 +126,10 @@ public class LevelManager : NetworkBehaviour
             zombieSpawnPoints = levelBuilder.GetZombieSpawnPoints();
             CoinsGenerated = levelBuilder.GetCoinsGenerated();
 
+            //El numero inicial de players es el numero total de players
+            numberOfHumans = NetworkManager.Singleton.ConnectedClientsIds.Count;
+            UpdateHumansZombiesClientRpc(numberOfHumans, numberOfZombies);
+
             // Sincroniza con los clientes
             SetCoinsGeneratedClientRpc(CoinsGenerated);
         }
