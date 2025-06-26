@@ -83,9 +83,7 @@ public class LevelBuilder : MonoBehaviour
         if (!NetworkManager.Singleton.IsServer || hasBuilt) return;
 
         CreateRooms(roomWidth, roomLength, numberOfRooms);
-
         hasBuilt = true;
-
     }
 
     /// <summary>

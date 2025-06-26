@@ -12,11 +12,26 @@ public class MenuManager : NetworkBehaviour
     public void StartGame()
     {
         var allPlayers = GameObject.FindGameObjectsWithTag("Player");
+
         foreach (var player in allPlayers)
         {
             player.GetComponent<NetworkObject>().Despawn();
         }
 
+        GameMode gameMode = GameMode.Monedas;
+        NetworkManager.Singleton.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+    }
+
+    public void ModoTiempo()
+    {
+        var allPlayers = GameObject.FindGameObjectsWithTag("Player");
+
+        foreach (var player in allPlayers)
+        {
+            player.GetComponent<NetworkObject>().Despawn();
+        }
+
+        GameMode gameMode = GameMode.Tiempo;
         NetworkManager.Singleton.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 

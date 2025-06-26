@@ -35,7 +35,7 @@ public class LevelManager : NetworkBehaviour
     [SerializeField] private GameMode gameMode;
 
     [Tooltip("Tiempo de partida en minutos para el modo tiempo")]
-    [SerializeField] private int minutes = 5;
+    [SerializeField] private int minutes = 1;
 
     private List<Vector3> humanSpawnPoints = new List<Vector3>();
     private List<Vector3> zombieSpawnPoints = new List<Vector3>();
@@ -45,8 +45,10 @@ public class LevelManager : NetworkBehaviour
     private TextMeshProUGUI zombiesText;
     private TextMeshProUGUI gameModeText;
 
-    private TextMeshProUGUI winText;
-    private TextMeshProUGUI defeatText;
+    private TextMeshProUGUI winTextHumans;
+    private TextMeshProUGUI winTextZombies;
+    private TextMeshProUGUI defeatTextHumans;
+    private TextMeshProUGUI defeatTextZombies;
     private TextMeshProUGUI semiWinText;
 
     private int CoinsGenerated = 0;
@@ -56,6 +58,8 @@ public class LevelManager : NetworkBehaviour
 
     private UniqueIdGenerator uniqueIdGenerator;
     private LevelBuilder levelBuilder;
+    // private LevelBuilder levelBuilderMonedas;
+    // private LevelBuilder levelBuilderTiempo;
 
     private PlayerController playerController;
 
@@ -77,6 +81,8 @@ public class LevelManager : NetworkBehaviour
 
         // Obtener la referencia al LevelBuilder
         levelBuilder = GetComponent<LevelBuilder>();
+        // levelBuilderMonedas = GetComponent<LevelBuilderMonedas>();
+        // levelBuilderTiempo = GetComponent<LevelBuilderTiempo>();
 
         Time.timeScale = 1f; // Asegurarse de que el tiempo no esté detenido
     }
@@ -92,12 +98,33 @@ public class LevelManager : NetworkBehaviour
 
             // Buscar el Panel dentro del CanvasHud
             Transform panel = canvas.transform.Find("PanelHud");
+            Transform panelGO = canvas.transform.Find("PanelGameOver");
+
             if (panel != null)
             {
                 // Buscar los TextMeshProUGUI llamados "HumansValue" y "ZombiesValue" dentro del Panel
                 Transform humansTextTransform = panel.Find("HumansValue");
                 Transform zombiesTextTransform = panel.Find("ZombiesValue");
-                Transform gameModeTextTransform = panel.Find("GameModeConditionValue");
+
+                if (gameMode == GameMode.Tiempo)
+                {
+                    Transform gameModeTextTransform = panel.Find("GameModeConditionTiempo");
+
+                    if (gameModeTextTransform != null)
+                    {
+                        gameModeText = gameModeTextTransform.GetComponent<TextMeshProUGUI>();
+                    }
+                }
+                else if (gameMode == GameMode.Monedas)
+                {
+                    Transform gameModeTextTransform = panel.Find("GameModeConditionMonedas");
+
+                    if (gameModeTextTransform != null)
+                    {
+                        gameModeText = gameModeTextTransform.GetComponent<TextMeshProUGUI>();
+                    }
+                }
+                
 
                 if (humansTextTransform != null)
                 {
@@ -109,9 +136,34 @@ public class LevelManager : NetworkBehaviour
                     zombiesText = zombiesTextTransform.GetComponent<TextMeshProUGUI>();
                 }
 
-                if (gameModeTextTransform != null)
+                if (winTextHumans == null)
                 {
-                    gameModeText = gameModeTextTransform.GetComponent<TextMeshProUGUI>();
+                    winTextHumans = panelGO.Find("WinConditionHumans").GetComponent<TextMeshProUGUI>();
+                    winTextHumans.enabled = false;
+                }
+
+                if (winTextZombies == null)
+                {
+                    winTextZombies = panelGO.Find("WinConditionZombies").GetComponent<TextMeshProUGUI>();
+                    winTextZombies.enabled = false;
+                }
+
+                if (defeatTextHumans == null)
+                {
+                    defeatTextHumans = panelGO.Find("DefeatConditionHumans").GetComponent<TextMeshProUGUI>();
+                    defeatTextHumans.enabled = false;
+                }
+
+                if (defeatTextZombies == null)
+                {
+                    defeatTextZombies = panelGO.Find("DefeatConditionZombies").GetComponent<TextMeshProUGUI>();
+                    defeatTextZombies.enabled = false;
+                }
+
+                if (semiWinText == null)
+                {
+                    semiWinText = panelGO.Find("SemiWinCondition").GetComponent<TextMeshProUGUI>();
+                    semiWinText.enabled = false;
                 }
             }
         }
@@ -128,10 +180,13 @@ public class LevelManager : NetworkBehaviour
 
             // Sincroniza con los clientes
             SetCoinsGeneratedClientRpc(CoinsGenerated);
+
+            //El numero inicial de players es el numero total de players
+            numberOfHumans = NetworkManager.Singleton.ConnectedClientsIds.Count;
+            UpdateHumansZombiesClientRpc(numberOfHumans, numberOfZombies);
         }
 
         SpawnTeams();
-
         UpdateTeamUI();
     }
 
@@ -139,6 +194,7 @@ public class LevelManager : NetworkBehaviour
     {
         if (gameMode == GameMode.Tiempo)
         {
+
             // Lógica para el modo de juego basado en tiempo
             HandleTimeLimitedGameMode();
         }
@@ -515,17 +571,6 @@ public class LevelManager : NetworkBehaviour
 
     private void HandleCoinBasedGameMode()
     {
-        /*if (isGameOver) return;
-
-        // Implementar la lógica para el modo de juego basado en monedas
-        if (gameModeText != null && playerController != null)
-        {
-            gameModeText.text = $"{playerController.CoinsCollected}/{CoinsGenerated}";
-            if (playerController.CoinsCollected == CoinsGenerated)
-            {
-                isGameOver = true;
-            }
-        }*/
         if (isGameOver) return;
 
         if (gameModeText != null)
@@ -537,8 +582,8 @@ public class LevelManager : NetworkBehaviour
 
             if (totalRecogidas >= totalGeneradas)
             {
-                isGameOver = true;
-                ShowGameOverPanel(); // o lanzar un ClientRpc
+                // Tener en cuenta si algun jugador se ha desconectado
+                WinCondition_HumansRpc();
             }
         }
     }
@@ -579,11 +624,11 @@ public class LevelManager : NetworkBehaviour
             {
                 if (jugador.GetComponent<PlayerController>().isZombie)
                 {
-                    defeatText.enabled = true;
+                    defeatTextZombies.enabled = true;
                 }
                 else
                 {
-                    winText.enabled = true;
+                    winTextHumans.enabled = true;
                 }
 
                 ShowGameOverPanel();
@@ -606,7 +651,7 @@ public class LevelManager : NetworkBehaviour
 
                 if (jugador.GetComponent<NetworkObject>().OwnerClientId == id)
                 {
-                    defeatText.enabled = true;
+                    defeatTextHumans.enabled = true;
                 }
                 else if (zombificado)
                 {
@@ -614,7 +659,7 @@ public class LevelManager : NetworkBehaviour
                 }
                 else
                 {
-                    winText.enabled = true;
+                    winTextZombies.enabled = true;
                 }
 
                 ShowGameOverPanel();
