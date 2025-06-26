@@ -13,8 +13,30 @@ public class GameManager : NetworkBehaviour
 
     private void Awake()
     {
-        if (Instance == null) Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
         else Destroy(gameObject);
+    }
+
+    private void OnEnable()
+    {
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
+        }
     }
     public override void OnNetworkSpawn()
     {
@@ -44,6 +66,27 @@ public class GameManager : NetworkBehaviour
         {
             TotalCoinsCollected.Value++;
         }
+    }
+
+    private void OnClientConnected(ulong clientId)
+    {
+        int totalPlayers = NetworkManager.Singleton.ConnectedClients.Count;
+
+        if (totalPlayers > 4 && IsServer)//1 host+3 clientes
+        {
+            Debug.Log($"Se ha alcanzado el límite de jugadores. Rechazando al cliente {clientId}");
+            NetworkManager.Singleton.DisconnectClient(clientId);
+        }
+        else
+        {
+            PlayersConnected.Value = totalPlayers;
+            Debug.Log($"Jugador conectado. Total ahora: {totalPlayers}");
+        }
+    }
+    private void OnClientDisconnected(ulong clientId)
+    {
+        PlayersConnected.Value = NetworkManager.Singleton.ConnectedClients.Count;
+        Debug.Log($"Jugador desconectado. Total ahora: {PlayersConnected.Value}");
     }
 
     [ClientRpc]
