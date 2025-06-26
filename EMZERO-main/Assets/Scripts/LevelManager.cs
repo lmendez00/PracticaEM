@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using Unity.Netcode;
+using Unity.VisualScripting;
+
 // using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -42,6 +44,10 @@ public class LevelManager : NetworkBehaviour
     private TextMeshProUGUI humansText;
     private TextMeshProUGUI zombiesText;
     private TextMeshProUGUI gameModeText;
+
+    private TextMeshProUGUI winText;
+    private TextMeshProUGUI defeatText;
+    private TextMeshProUGUI semiWinText;
 
     private int CoinsGenerated = 0;
 
@@ -197,6 +203,7 @@ public class LevelManager : NetworkBehaviour
             Quaternion playerRotation = human.transform.rotation;
             string uniqueID = human.GetComponent<PlayerController>().uniqueID;
             ulong id = human.GetComponent<NetworkObject>().OwnerClientId; 
+
             // Destruir el humano actual
             human.GetComponent<NetworkObject>().Despawn();
             //Destroy(human);
@@ -217,6 +224,15 @@ public class LevelManager : NetworkBehaviour
                 playerController.uniqueID = uniqueID; // Mantener el identificador único
                 numberOfHumans--; // Reducir el número de humanos
                 numberOfZombies++; // Aumentar el número de zombis
+
+                playerController.zombificados.Value = true;
+
+                if (numberOfHumans == 0)
+                {
+                    WinCondition_ZombiesRpc(id);
+                }
+
+                UpdateHumansZombiesClientRpc(numberOfHumans, numberOfZombies);
                 UpdateTeamUI();
 
                 if (enabled)
@@ -440,6 +456,13 @@ public class LevelManager : NetworkBehaviour
         }
     }
 
+    [ClientRpc]
+    void UpdateHumansZombiesClientRpc(int humanos, int zombies)
+    {
+        this.numberOfHumans = humanos;
+        this.numberOfZombies = zombies;
+    }
+
     private void UpdateTeamUI()
     {
         if (humansText != null)
@@ -458,7 +481,6 @@ public class LevelManager : NetworkBehaviour
     {
         CoinsGenerated = totalCoins;
     }
-
 
     #endregion
 
@@ -544,6 +566,60 @@ public class LevelManager : NetworkBehaviour
         SceneManager.LoadScene("MenuScene"); // Cambia "MenuScene" por el nombre de tu escena principal
     }
 
-    #endregion
+    [Rpc(SendTo.ClientsAndHost)]
+    public void WinCondition_HumansRpc()
+    {
+        Debug.Log("Ganan los humanos!");
 
+        var allPlayers = GameObject.FindGameObjectsWithTag("Player");
+
+        foreach (var jugador in allPlayers)
+        {
+            if (jugador.GetComponent<PlayerController>().IsOwner)
+            {
+                if (jugador.GetComponent<PlayerController>().isZombie)
+                {
+                    defeatText.enabled = true;
+                }
+                else
+                {
+                    winText.enabled = true;
+                }
+
+                ShowGameOverPanel();
+            }
+        }
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void WinCondition_ZombiesRpc(ulong id)
+    {
+        Debug.Log("Ganan los zombies!");
+
+        var jugadores = GameObject.FindGameObjectsWithTag("Player");
+
+        foreach (var jugador in jugadores)
+        {
+            if (jugador.GetComponent<PlayerController>().IsOwner)
+            {
+                bool zombificado = jugador.GetComponent<PlayerController>().zombificados.Value;
+
+                if (jugador.GetComponent<NetworkObject>().OwnerClientId == id)
+                {
+                    defeatText.enabled = true;
+                }
+                else if (zombificado)
+                {
+                    semiWinText.enabled = true;
+                }
+                else
+                {
+                    winText.enabled = true;
+                }
+
+                ShowGameOverPanel();
+            }
+        }
+    }
+    #endregion
 }
