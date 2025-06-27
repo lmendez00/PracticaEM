@@ -32,7 +32,7 @@ public class LevelManager : NetworkBehaviour
 
     [Header("Game Mode Settings")]
     [Tooltip("Selecciona el modo de juego")]
-    [SerializeField] private GameMode gameMode;
+    public static GameMode gameMode;
 
     [Tooltip("Tiempo de partida en minutos para el modo tiempo")]
     [SerializeField] private int minutes = 1;
@@ -173,6 +173,8 @@ public class LevelManager : NetworkBehaviour
         // Obtener los puntos de aparición y el número de monedas generadas desde LevelBuilder
         if (IsServer && levelBuilder != null)
         {
+            levelBuilder.generateCoins = (gameMode == GameMode.Monedas);
+
             levelBuilder.Build();
             humanSpawnPoints = levelBuilder.GetHumanSpawnPoints();
             zombieSpawnPoints = levelBuilder.GetZombieSpawnPoints();
@@ -670,5 +672,6 @@ public class LevelManager : NetworkBehaviour
             }
         }
     }
+
     #endregion
 }

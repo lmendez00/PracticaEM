@@ -18,7 +18,7 @@ public class MenuManager : NetworkBehaviour
             player.GetComponent<NetworkObject>().Despawn();
         }
 
-        GameMode gameMode = GameMode.Monedas;
+        LevelManager.gameMode = GameMode.Monedas;
         NetworkManager.Singleton.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
@@ -31,7 +31,12 @@ public class MenuManager : NetworkBehaviour
             player.GetComponent<NetworkObject>().Despawn();
         }
 
-        GameMode gameMode = GameMode.Tiempo;
+        //GameMode gameMode = GameMode.Tiempo;
+        LevelManager.gameMode = GameMode.Tiempo;
+        if (LevelManager.gameMode == GameMode.Tiempo)
+        {
+            Debug.Log("El modo tiempo esta activo");
+        }
         NetworkManager.Singleton.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
@@ -43,4 +48,5 @@ public class MenuManager : NetworkBehaviour
             Application.Quit(); // Salir en una build
 #endif
     }
+
 }

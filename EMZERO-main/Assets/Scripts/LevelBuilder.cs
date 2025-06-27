@@ -60,6 +60,7 @@ public class LevelBuilder : MonoBehaviour
 
     private bool hasBuilt = false;
 
+    public bool generateCoins = true;
 
     #endregion
 
@@ -294,6 +295,11 @@ public class LevelBuilder : MonoBehaviour
     /// </summary>
     private void CreateCoin(int x, int z, int width, int length, Vector3 tilePosition)
     {
+        if (!generateCoins)
+        {
+            return;
+        };
+
         bool widthBorderCondition = x > 0 && x < (width - 1);
         bool lengthBorderCondition = z > 0 && z < (length - 1);
 
