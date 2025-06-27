@@ -6,7 +6,6 @@ using UnityEngine;
 
 public class PlayerController : NetworkBehaviour
 {
-    private TextMeshProUGUI coinText;
 
     [Header("Stats")]
     public int CoinsCollected = 0;
@@ -26,6 +25,8 @@ public class PlayerController : NetworkBehaviour
 
     public NetworkVariable<bool> zombificados = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
 
+    private TextMeshProUGUI coinTextValue;
+    private TextMeshProUGUI coinRemainingText;
 
     void Start()
     {
@@ -48,15 +49,21 @@ public class PlayerController : NetworkBehaviour
             if (panel != null)
             {
                 // Buscar el TextMeshProUGUI llamado "CoinsValue" dentro del Panel
+
                 Transform coinTextTransform = panel.Find("CoinsValue");
                 if (coinTextTransform != null)
                 {
-                    coinText = coinTextTransform.GetComponent<TextMeshProUGUI>();
+                    coinTextValue = coinTextTransform.GetComponent<TextMeshProUGUI>();
+                    coinTextValue.enabled = false;
                 }
+
+                coinRemainingText = panel.Find("Coins").GetComponent<TextMeshProUGUI>();
+                coinRemainingText.enabled = false;
+                
             }
         }
 
-        UpdateCoinUI();
+        if(LevelManager.gameMode == GameMode.Monedas) UpdateCoinUI();
     }
 
     
@@ -91,34 +98,10 @@ public class PlayerController : NetworkBehaviour
 
     }
 
-    /*void MovePlayer()
-    {
-        if (cameraTransform == null) { return; }
-
-        // Calcular la dirección de movimiento en relación a la cámara
-        Vector3 moveDirection = (cameraTransform.forward * verticalInput + cameraTransform.right * horizontalInput).normalized;
-        moveDirection.y = 0f; // Asegurarnos de que el movimiento es horizontal (sin componente Y)
-
-        // Mover el jugador usando el Transform
-        if (moveDirection != Vector3.zero)
-        {
-            // Calcular la rotación en Y basada en la dirección del movimiento
-            Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 720f * Time.deltaTime);
-
-            // Ajustar la velocidad si es zombie
-            float adjustedSpeed = isZombie ? moveSpeed * zombieSpeedModifier : moveSpeed;
-
-            // Mover al jugador en la dirección deseada
-            transform.Translate(moveDirection * adjustedSpeed * Time.deltaTime, Space.World);
-            //OnMoveRpc(this.transform.position, this.transform.rotation);
-        }
-    }*/
-
     void MovePlayer()
     {
         if (cameraTransform == null) return;
-        Debug.Log("Entra en Move");
+        //Debug.Log("Entra en Move");
         // Calcular dirección en base a input + cámara
         Vector3 moveDirection = (cameraTransform.forward * verticalInput + cameraTransform.right * horizontalInput).normalized;
         moveDirection.y = 0f;
@@ -127,7 +110,7 @@ public class PlayerController : NetworkBehaviour
         {
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
             float adjustedSpeed = isZombie ? moveSpeed * zombieSpeedModifier : moveSpeed;
-            Debug.Log("MovimientoBien");
+            //Debug.Log("MovimientoBien");
             // Calcular nueva posición y rotación
             Vector3 newPosition = transform.position + moveDirection * adjustedSpeed * Time.deltaTime;
             Quaternion newRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 720f * Time.deltaTime);
@@ -150,7 +133,7 @@ public class PlayerController : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     void HandleAnimationsRpc(float horizontalInput, float verticalInput)
     {
-        Debug.Log("Animaciones bien");
+        //Debug.Log("Animaciones bien");
         // Animaciones basadas en la dirección del movimiento
         animator.SetFloat("Speed", Mathf.Abs(horizontalInput) + Mathf.Abs(verticalInput));  // Controla el movimiento (caminar/correr)
     }
@@ -183,11 +166,16 @@ public class PlayerController : NetworkBehaviour
     }
     void UpdateCoinUI()
     {
-        if (coinText != null)
+        
+        if (coinTextValue != null)
         {
-            coinText.text = $"{CoinsCollected}";
+            coinTextValue.enabled = true;
+            coinRemainingText.enabled = true;
+            coinTextValue.text = $"{CoinsCollected}";
         }
     }
+
+    
 
 
     ////////////////////////////////

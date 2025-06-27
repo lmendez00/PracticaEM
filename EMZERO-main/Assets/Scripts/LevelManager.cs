@@ -32,7 +32,7 @@ public class LevelManager : NetworkBehaviour
 
     [Header("Game Mode Settings")]
     [Tooltip("Selecciona el modo de juego")]
-    public static GameMode gameMode;
+    public static GameMode gameMode; //Se ha puesto publico porque si no daba problemas a la hora de comprobar el modo de juego
 
     [Tooltip("Tiempo de partida en minutos para el modo tiempo")]
     [SerializeField] private int minutes = 1;
@@ -44,6 +44,7 @@ public class LevelManager : NetworkBehaviour
     private TextMeshProUGUI humansText;
     private TextMeshProUGUI zombiesText;
     private TextMeshProUGUI gameModeText;
+
 
     private TextMeshProUGUI winTextHumans;
     private TextMeshProUGUI winTextZombies;
@@ -58,8 +59,7 @@ public class LevelManager : NetworkBehaviour
 
     private UniqueIdGenerator uniqueIdGenerator;
     private LevelBuilder levelBuilder;
-    // private LevelBuilder levelBuilderMonedas;
-    // private LevelBuilder levelBuilderTiempo;
+    
 
     private PlayerController playerController;
 
@@ -67,6 +67,7 @@ public class LevelManager : NetworkBehaviour
     private bool isGameOver = false;
 
     public GameObject gameOverPanel; // Asigna el panel desde el inspector
+
 
     #endregion
 
@@ -81,8 +82,7 @@ public class LevelManager : NetworkBehaviour
 
         // Obtener la referencia al LevelBuilder
         levelBuilder = GetComponent<LevelBuilder>();
-        // levelBuilderMonedas = GetComponent<LevelBuilderMonedas>();
-        // levelBuilderTiempo = GetComponent<LevelBuilderTiempo>();
+        
 
         Time.timeScale = 1f; // Asegurarse de que el tiempo no esté detenido
     }
@@ -106,25 +106,12 @@ public class LevelManager : NetworkBehaviour
                 Transform humansTextTransform = panel.Find("HumansValue");
                 Transform zombiesTextTransform = panel.Find("ZombiesValue");
 
-                if (gameMode == GameMode.Tiempo)
-                {
-                    Transform gameModeTextTransform = panel.Find("GameModeConditionTiempo");
+                Transform gameModeTextTransform = panel.Find("GameModeCondition");
 
-                    if (gameModeTextTransform != null)
-                    {
-                        gameModeText = gameModeTextTransform.GetComponent<TextMeshProUGUI>();
-                    }
-                }
-                else if (gameMode == GameMode.Monedas)
+                if (gameModeTextTransform != null)
                 {
-                    Transform gameModeTextTransform = panel.Find("GameModeConditionMonedas");
-
-                    if (gameModeTextTransform != null)
-                    {
-                        gameModeText = gameModeTextTransform.GetComponent<TextMeshProUGUI>();
-                    }
+                    gameModeText = gameModeTextTransform.GetComponent<TextMeshProUGUI>();
                 }
-                
 
                 if (humansTextTransform != null)
                 {
@@ -187,9 +174,6 @@ public class LevelManager : NetworkBehaviour
             // Sincroniza con los clientes
             SetCoinsGeneratedClientRpc(CoinsGenerated);
 
-            //El numero inicial de players es el numero total de players
-            numberOfHumans = NetworkManager.Singleton.ConnectedClientsIds.Count;
-            UpdateHumansZombiesClientRpc(numberOfHumans, numberOfZombies);
         }
 
         SpawnTeams();
@@ -203,7 +187,8 @@ public class LevelManager : NetworkBehaviour
 
             // Lógica para el modo de juego basado en tiempo
             HandleTimeLimitedGameMode();
-        }
+            
+}
         else if (gameMode == GameMode.Monedas)
         {
             // Lógica para el modo de juego basado en monedas
@@ -538,6 +523,7 @@ public class LevelManager : NetworkBehaviour
         }
     }
 
+
     [ClientRpc]
     void SetCoinsGeneratedClientRpc(int totalCoins)
     {
@@ -555,10 +541,12 @@ public class LevelManager : NetworkBehaviour
 
         // Decrementar remainingSeconds basado en Time.deltaTime
         remainingSeconds -= Time.deltaTime;
+        Debug.Log($"Quedan {remainingSeconds} segundos");
 
         // Comprobar si el tiempo ha llegado a cero
         if (remainingSeconds <= 0)
         {
+            WinCondition_HumansRpc();
             isGameOver = true;
             remainingSeconds = 0;
         }
@@ -570,6 +558,7 @@ public class LevelManager : NetworkBehaviour
         // Actualizar el texto de la interfaz de usuario
         if (gameModeText != null)
         {
+            Debug.Log($"Entra en gameModeText de Tiempo, minutos {minutesRemaining} segundos{secondsRemaining}");
             gameModeText.text = $"{minutesRemaining:D2}:{secondsRemaining:D2}";
         }
 
@@ -590,6 +579,7 @@ public class LevelManager : NetworkBehaviour
             {
                 // Tener en cuenta si algun jugador se ha desconectado
                 WinCondition_HumansRpc();
+                //OYE a lo mejor hay que añadir: isGameOver = true;
             }
         }
     }
