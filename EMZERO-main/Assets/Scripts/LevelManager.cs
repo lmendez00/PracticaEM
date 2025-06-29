@@ -4,8 +4,6 @@ using System.Linq;
 using TMPro;
 using Unity.Netcode;
 using Unity.VisualScripting;
-
-// using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -70,7 +68,7 @@ public class LevelManager : NetworkBehaviour
 
     public bool modoMedio;
 
-    public GameObject gameOverPanel; // Asigna el panel desde el inspector
+    public GameObject gameOverPanel;
 
 
 
@@ -90,26 +88,26 @@ public class LevelManager : NetworkBehaviour
         levelBuilder = GetComponent<LevelBuilder>();
         
 
-        Time.timeScale = 1f; // Asegurarse de que el tiempo no esté detenido
+        Time.timeScale = 1f; //Asegurarse de que el tiempo no esté detenido
     }
 
     private void Start()
     {
         gameMode = GameManager.Instance.CurrentGameMode.Value;
         Debug.Log("Iniciando el nivel");
-        // Buscar el objeto "CanvasPlayer" en la escena
+        //Buscar el objeto "CanvasPlayer" en la escena
         GameObject canvas = GameObject.Find("CanvasPlayer");
         if (canvas != null)
         {
             Debug.Log("Canvas encontrado");
 
-            // Buscar el Panel dentro del CanvasHud
+            //Buscar el Panel dentro del CanvasHud
             Transform panel = canvas.transform.Find("PanelHud");
             Transform panelGO = canvas.transform.Find("PanelGameOver");
 
             if (panel != null)
             {
-                // Buscar los TextMeshProUGUI llamados "HumansValue" y "ZombiesValue" dentro del Panel
+                //Buscar los TextMeshProUGUI llamados "HumansValue" y "ZombiesValue" dentro del Panel
                 Transform humansTextTransform = panel.Find("HumansValue");
                 Transform zombiesTextTransform = panel.Find("ZombiesValue");
 
@@ -208,13 +206,12 @@ public class LevelManager : NetworkBehaviour
         }
         else if (gameMode == GameMode.Monedas)
         {
-            // Lógica para el modo de juego basado en monedas
             HandleCoinBasedGameMode();
         }
 
-        if (Input.GetKeyDown(KeyCode.Z)) // Presiona "Z" para convertirte en Zombie
+        if (Input.GetKeyDown(KeyCode.Z)) 
         {
-            // Comprobar si el jugador actual está usando el prefab de humano
+            //Comprobar si el jugador actual está usando el prefab de humano
             GameObject currentPlayer = GameObject.FindGameObjectWithTag("Player");
             if (currentPlayer != null && currentPlayer.name.Contains(playerPrefab.name))
             {
@@ -225,7 +222,7 @@ public class LevelManager : NetworkBehaviour
                 Debug.Log("El jugador actual no es un humano.");
             }
         }
-        else if (Input.GetKeyDown(KeyCode.H)) // Presiona "H" para convertirte en Humano
+        else if (Input.GetKeyDown(KeyCode.H))
         {
             // Comprobar si el jugador actual está usando el prefab de zombie
             GameObject currentPlayer = GameObject.FindGameObjectWithTag("Player");
@@ -286,8 +283,8 @@ public class LevelManager : NetworkBehaviour
                 playerController.enabled = enabled;
                 playerController.isZombie = true; // Cambiar el estado a zombie
                 playerController.uniqueID = uniqueID; // Mantener el identificador único
-                numberOfHumans--; // Reducir el número de humanos
-                numberOfZombies++; // Aumentar el número de zombis
+                numberOfHumans--;
+                numberOfZombies++;
 
                 playerController.zombificados.Value = true;
 
@@ -376,9 +373,9 @@ public class LevelManager : NetworkBehaviour
                 {
                     playerController.enabled = true;
                     playerController.cameraTransform = mainCamera.transform;
-                    playerController.isZombie = false; // Cambiar el estado a humano
-                    numberOfHumans++; // Aumentar el número de humanos
-                    numberOfZombies--; // Reducir el número de zombis
+                    playerController.isZombie = false; 
+                    numberOfHumans++; 
+                    numberOfZombies--;
                 }
                 else
                 {
@@ -406,13 +403,13 @@ public class LevelManager : NetworkBehaviour
         if (prefab != null)
         {
             Debug.Log($"Instanciando jugador en {spawnPosition}");
-            // Crear una instancia del prefab en el punto especificado
+            //Crear una instancia del prefab en el punto especificado
 
 
-            // Verifica si el jugador ya existe en el diccionario
+            //Verificar si el jugador ya existe
             if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
             {
-                // Si ya tiene un objeto de jugador, no hace nada
+                //Si ya tiene un objeto de jugador, no hace nada
                 if (client.PlayerObject != null)
                     return;
             }
@@ -428,7 +425,7 @@ public class LevelManager : NetworkBehaviour
 
             player.tag = "Player";
 
-            // Obtener la referencia a la cámara principal
+            //Obtener la referencia a la cámara principal
             Camera mainCamera = player.transform.GetChild(3).gameObject.GetComponent<Camera>();
 
             if (mainCamera != null)
@@ -438,15 +435,13 @@ public class LevelManager : NetworkBehaviour
 
                 if (cameraController != null)
                 {
-                    //Debug.Log($"CameraController encontrado en la cámara principal.");
                     // Asignar el jugador al script CameraController
                     cameraController.player = player.transform;
                 }
 
-                //Debug.Log($"Cámara principal encontrada en {mainCamera}");
-                // Obtener el componente PlayerController del jugador instanciado
+                //Obtener el componente PlayerController del jugador instanciado
                 playerController = player.GetComponent<PlayerController>();
-                // Asignar el transform de la cámara al PlayerController
+                //Asignar el transform de la cámara al PlayerController
                 if (playerController != null)
                 {
                     //Debug.Log($"PlayerController encontrado en el jugador instanciado.");
@@ -474,75 +469,33 @@ public class LevelManager : NetworkBehaviour
 
     private void SpawnTeams()
     {
-        /*
-        Debug.Log("Instanciando equipos");
-        foreach (ulong id in NetworkManager.Singleton.ConnectedClientsIds)
-        {
-            if (IsHost)
-            {
-                SpawnPlayer(humanSpawnPoints[0], playerPrefab, id);
-            }
-        }
-
-        if (humanSpawnPoints.Count <= 0) { return; }
        
-        Debug.Log($"Personaje jugable instanciado en {humanSpawnPoints[0]}");
-
-        for (int i = 1; i < numberOfHumans; i++)
-        {
-            if (i < humanSpawnPoints.Count)
-            {
-                SpawnNonPlayableCharacter(playerPrefab, humanSpawnPoints[i]);
-            }
-        }
-
-        for (int i = 0; i < numberOfZombies; i++)
-        {
-            if (i < zombieSpawnPoints.Count)
-            {
-                SpawnNonPlayableCharacter(zombiePrefab, zombieSpawnPoints[i]);
-            }
-        }*/
 
         Debug.Log("Instanciando equipos aleatorios...");
 
         var connectedClients = NetworkManager.Singleton.ConnectedClientsIds.ToList();
         int totalPlayers = connectedClients.Count;
 
-        // Mezclar los IDs aleatoriamente
+        //Mezclar los IDs aleatoriamente
         System.Random rnd = new System.Random();
         connectedClients = connectedClients.OrderBy(x => rnd.Next()).ToList();
 
-        // Calcular número de humanos y zombies
+        //Calcular número de humanos y zombies
         int numHumans = totalPlayers / 2;
-        int numZombies = totalPlayers - numHumans; // Igual o uno más que humanos
+        int numZombies = totalPlayers - numHumans; //Igual o uno más que humanos
 
-        // Obtener puntos de spawn
-        /*if (humanSpawnPoints.Count < numHumans)
-        {
-            Debug.LogError("No hay suficientes puntos de aparición en humanos.");
-            //return;
-        }
-
-        if(zombieSpawnPoints.Count < numZombies)
-        {
-            Debug.LogError("No hay suficientes puntos de aparición en zombies.");
-            //return;
-        }*/
-        // Instanciar humanos
         for (int i = 0; i < numHumans; i++)
         {
             SpawnPlayer(humanSpawnPoints[0], playerPrefab, connectedClients[i]);
         }
 
-        // Instanciar zombies
         for (int i = 0; i < numZombies; i++)
         {
             int index = i + numHumans;
             SpawnPlayer(zombieSpawnPoints[i], zombiePrefab, connectedClients[index]);
         }
 
-        // Actualizar contadores
+        //Actualizar contadores
         numberOfHumans = numHumans;
         numberOfZombies = numZombies;
         UpdateHumansZombiesClientRpc(numberOfHumans, numberOfZombies);
@@ -553,12 +506,11 @@ public class LevelManager : NetworkBehaviour
         if (prefab != null)
         {
             GameObject npc = Instantiate(prefab, spawnPosition, Quaternion.identity);
-            // Desactivar el controlador del jugador en los NPCs
             var playerController = npc.GetComponent<PlayerController>();
             if (playerController != null)
             {
-                playerController.enabled = false; // Desactivar el controlador del jugador
-                playerController.uniqueID = uniqueIdGenerator.GenerateUniqueID(); // Asignar un identificador único
+                playerController.enabled = false; 
+                playerController.uniqueID = uniqueIdGenerator.GenerateUniqueID(); 
             }
             Debug.Log($"Personaje no jugable instanciado en {spawnPosition}");
         }
@@ -597,14 +549,13 @@ public class LevelManager : NetworkBehaviour
 
     private void HandleTimeLimitedGameMode()
     {
-        // Implementar la lógica para el modo de juego basado en tiempo
+        //Implementar la lógica para el modo de juego basado en tiempo
         if (isGameOver) return;
 
         
-        // Decrementar remainingSeconds basado en Time.deltaTime
         remainingSeconds -= Time.deltaTime;
 
-        // Comprobar si el tiempo ha llegado a cero
+        //Si el tiempo es 0 se termina
         if (remainingSeconds <= 0)
         {
             WinCondition_HumansRpc();
@@ -614,11 +565,11 @@ public class LevelManager : NetworkBehaviour
             SetRemainingTimeClientRpc(0);
         }
 
-        // Convertir remainingSeconds a minutos y segundos
+        //RemainingSeconds a minutos y segundos
         int minutesRemaining = Mathf.FloorToInt(remainingSeconds / 60);
         int secondsRemaining = Mathf.FloorToInt(remainingSeconds % 60);
 
-        // Actualizar el texto de la interfaz de usuario
+        //Actualizar la interfaz
         if (gameModeText != null)
         {
             //Debug.Log($"Entra en gameModeText de Tiempo, minutos {minutesRemaining} segundos{secondsRemaining}");
@@ -640,7 +591,7 @@ public class LevelManager : NetworkBehaviour
 
             if (totalRecogidas >= totalGeneradas)
             {
-                // Tener en cuenta si algun jugador se ha desconectado
+                //Tener en cuenta si algun jugador se ha desconectado
                 WinCondition_HumansRpc();
                 isGameOver = true;
             }
@@ -662,16 +613,7 @@ public class LevelManager : NetworkBehaviour
 
     public void ReturnToMainMenu()
     {
-        /*
-        // Gestión del cursor
-        Cursor.lockState = CursorLockMode.Locked; // Bloquea el cursor
-        Cursor.visible = false; // Oculta el cursor
-
-        // Cargar la escena del menú principal
-        SceneManager.LoadScene("MenuScene");
-        */
-
-        ResetGameRequestRpc(); // Resetea el GameManager
+        ResetGameRequestRpc(); //Resetea el GameManager
         if (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsServer)
         {
             var allPlayers = GameObject.FindGameObjectsWithTag("Player");
@@ -679,10 +621,8 @@ public class LevelManager : NetworkBehaviour
             {
                 player.GetComponent<NetworkObject>().Despawn();
             }
-            //NetworkManager.Singleton.SceneManager.LoadScene("MenuScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
             CleanupAndReturnToMenu();
         }
-        //NetworkManager.Singleton.SceneManager.LoadScene("MenuScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
 
 
     }
@@ -753,33 +693,6 @@ public class LevelManager : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     public void WinCondition_ZombiesRpc(ulong id)
     {
-        /*
-        Debug.Log("Ganan los zombies!");
-
-        var jugadores = GameObject.FindGameObjectsWithTag("Player");
-
-        foreach (var jugador in jugadores)
-        {
-            if (jugador.GetComponent<PlayerController>().IsOwner)
-            {
-                bool zombificado = jugador.GetComponent<PlayerController>().zombificados.Value;
-
-                if (jugador.GetComponent<NetworkObject>().OwnerClientId == id)
-                {
-                    defeatTextHumans.enabled = true;
-                }
-                else if (zombificado)
-                {
-                    semiWinText.enabled = true;
-                }
-                else
-                {
-                    winTextZombies.enabled = true;
-                }
-
-                ShowGameOverPanel();
-            }
-        }*/
         Debug.Log("Ganan los zombies!");
 
         var jugadores = GameObject.FindGameObjectsWithTag("Player");
@@ -789,7 +702,7 @@ public class LevelManager : NetworkBehaviour
             var pc = jugador.GetComponent<PlayerController>();
             if (pc == null || !pc.IsOwner) continue;
 
-            // Mostrar el mensaje correcto basado en el estado del jugador
+            //Mostrar el mensaje correcto basado en el estado del jugador
             if (pc.isZombie && pc.zombificados.Value)
             {
                 semiWinText.enabled = true;

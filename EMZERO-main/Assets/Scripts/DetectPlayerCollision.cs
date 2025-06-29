@@ -28,11 +28,11 @@ public class DetectPlayerCollision : NetworkBehaviour
                 var networkObject = GetComponent<NetworkObject>();
                 if (networkObject != null)
                 {
-                    networkObject.Despawn(true); // Elimina en todos los clientes
+                    networkObject.Despawn(true); //Elimina en todos los clientes
                 }
                 else
                 {
-                    Destroy(gameObject); // Fallback por si no es NetworkObject
+                    Destroy(gameObject); //Fallback por si no es NetworkObject
                 }
             }
         }

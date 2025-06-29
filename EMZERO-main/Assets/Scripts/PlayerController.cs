@@ -34,7 +34,6 @@ public class PlayerController : NetworkBehaviour
         if (!IsOwner)
         {
             this.GetComponent<PlayerController>().enabled = false;
-            // enabled = false;
         }
 
         // Buscar el objeto "CanvasPlayer" en la escena
@@ -44,11 +43,11 @@ public class PlayerController : NetworkBehaviour
         {
             Debug.Log("Canvas encontrado");
 
-            // Buscar el Panel dentro del CanvasHud
+            //Buscar el Panel dentro del CanvasHud
             Transform panel = canvas.transform.Find("PanelHud");
             if (panel != null)
             {
-                // Buscar el TextMeshProUGUI llamado "CoinsValue" dentro del Panel
+                //Buscar el TextMeshProUGUI llamado "CoinsValue" dentro del Panel
 
                 Transform coinTextTransform = panel.Find("CoinsValue");
                 if (coinTextTransform != null)
@@ -71,12 +70,6 @@ public class PlayerController : NetworkBehaviour
     {
         base.OnNetworkSpawn();
     }
-
-    /*void InitializeOwner()
-    {
-        // GetComponent<PlayerInput>().enabled = true;
-        Debug.Log("Player iniciado como dueño local: " + uniqueID);
-    }*/
     
 
     void Update()
@@ -110,7 +103,6 @@ public class PlayerController : NetworkBehaviour
         {
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
             float adjustedSpeed = isZombie ? moveSpeed * zombieSpeedModifier : moveSpeed;
-            //Debug.Log("MovimientoBien");
             // Calcular nueva posición y rotación
             Vector3 newPosition = transform.position + moveDirection * adjustedSpeed * Time.deltaTime;
             Quaternion newRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 720f * Time.deltaTime);
@@ -126,16 +118,14 @@ public class PlayerController : NetworkBehaviour
         transform.position = position;
         transform.rotation = rotation;
     }
-    ///////
     
 
 
     [Rpc(SendTo.ClientsAndHost)]
     void HandleAnimationsRpc(float horizontalInput, float verticalInput)
     {
-        //Debug.Log("Animaciones bien");
         // Animaciones basadas en la dirección del movimiento
-        animator.SetFloat("Speed", Mathf.Abs(horizontalInput) + Mathf.Abs(verticalInput));  // Controla el movimiento (caminar/correr)
+        animator.SetFloat("Speed", Mathf.Abs(horizontalInput) + Mathf.Abs(verticalInput));  //Controla el movimiento (caminar/correr)
     }
 
     public void CoinCollected()
@@ -146,10 +136,10 @@ public class PlayerController : NetworkBehaviour
 
             if (IsServer)
             {
-                // Actualiza el contador en el servidor (opcional si sincronizas globalmente)
+                //Actualiza el contador en el servidor (opcional si sincronizas globalmente)
                 GameManager.Instance.AddCoin();
 
-                // Llama al RPC para actualizar el texto en el cliente dueño
+                //Llama al RPC para actualizar el texto en el cliente dueño
                 UpdateCoinUIClientRpc(OwnerClientId, CoinsCollected);
             }
         }
@@ -174,19 +164,6 @@ public class PlayerController : NetworkBehaviour
             coinTextValue.text = $"{CoinsCollected}";
         }
     }
-
-    
-
-
-    ////////////////////////////////
-
-    // [Rpc(SendTo.Server)]    // Manda las actualizaciones al servidor (!!!)
-    /*[Rpc(SendTo.ClientsAndHost)]
-    public void OnMoveRpc(Vector3 playerTransform, Quaternion playerRotation)
-    {
-        this.transform.position = playerTransform;
-        this.transform.rotation = playerRotation;
-    }*/
 }
 
 

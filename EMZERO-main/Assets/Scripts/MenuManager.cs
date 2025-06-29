@@ -47,7 +47,6 @@ public class MenuManager : NetworkBehaviour
             player.GetComponent<NetworkObject>().Despawn();
         }
 
-        //GameMode gameMode = GameMode.Tiempo;
         GameManager.Instance.CurrentGameMode.Value = GameMode.Tiempo;
         if (LevelManager.gameMode == GameMode.Tiempo)
         {

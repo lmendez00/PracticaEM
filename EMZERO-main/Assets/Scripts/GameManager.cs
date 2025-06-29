@@ -44,7 +44,6 @@ public class GameManager : NetworkBehaviour
     {
         if (IsServer)
         {
-            //StartCoroutine(WaitForSceneLoadThenBuild());
             PlayersConnected.Value = NetworkManager.ConnectedClients.Count;
         }
     }
@@ -76,14 +75,5 @@ public class GameManager : NetworkBehaviour
     {
         PlayersConnected.Value = NetworkManager.Singleton.ConnectedClients.Count;
         Debug.Log($"Jugador desconectado. Total ahora: {PlayersConnected.Value}");
-    }
-
-    
-
-    [ClientRpc]
-    void NotifyClientsMapReadyClientRpc()
-    {
-        Debug.Log("Mapa generado por el servidor. Cliente listo para jugar.");
-        // Aquí puedes activar un flag local si necesitas bloquear UI o controles hasta que esto llegue
     }
 }
