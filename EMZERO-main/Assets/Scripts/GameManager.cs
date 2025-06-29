@@ -46,19 +46,6 @@ public class GameManager : NetworkBehaviour
             PlayersConnected.Value = NetworkManager.ConnectedClients.Count;
         }
     }
-    /*
-    private IEnumerator WaitForSceneLoadThenBuild()
-    {
-        //Esperar a que la escena esté completamente cargada
-        yield return new WaitForSeconds(1f);// Ajustable según necesidad
-
-        levelBuilder = FindObjectOfType<LevelBuilder>();
-        if (levelBuilder != null)
-        {
-            levelBuilder.Build(); // Solo el servidor construye el mapa
-            NotifyClientsMapReadyClientRpc();
-        }
-    }*/
 
     public void AddCoin()
     {

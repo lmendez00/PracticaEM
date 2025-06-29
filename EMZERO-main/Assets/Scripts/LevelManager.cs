@@ -401,7 +401,7 @@ public class LevelManager : NetworkBehaviour
             }
             Debug.Log("Antes del Spawn: " + NetworkManager.Singleton.SpawnManager.SpawnedObjectsList.Count);
             // Instancia el nuevo jugador y lo asigna al cliente
-            GameObject player = Instantiate(prefab, new Vector3(3,3,3), Quaternion.identity);
+            GameObject player = Instantiate(prefab, spawnPosition, Quaternion.identity);
             NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
             playerNetworkObject.SpawnWithOwnership(clientId); // Asigna la propiedad al cliente
 
@@ -457,6 +457,7 @@ public class LevelManager : NetworkBehaviour
 
     private void SpawnTeams()
     {
+        /*
         Debug.Log("Instanciando equipos");
         foreach (ulong id in NetworkManager.Singleton.ConnectedClientsIds)
         {
@@ -484,7 +485,51 @@ public class LevelManager : NetworkBehaviour
             {
                 SpawnNonPlayableCharacter(zombiePrefab, zombieSpawnPoints[i]);
             }
+        }*/
+
+        Debug.Log("Instanciando equipos aleatorios...");
+
+        var connectedClients = NetworkManager.Singleton.ConnectedClientsIds.ToList();
+        int totalPlayers = connectedClients.Count;
+
+        // Mezclar los IDs aleatoriamente
+        System.Random rnd = new System.Random();
+        connectedClients = connectedClients.OrderBy(x => rnd.Next()).ToList();
+
+        // Calcular número de humanos y zombies
+        int numHumans = totalPlayers / 2;
+        int numZombies = totalPlayers - numHumans; // Igual o uno más que humanos
+
+        // Obtener puntos de spawn
+        if (humanSpawnPoints.Count < numHumans)
+        {
+            Debug.LogError("No hay suficientes puntos de aparición en humanos.");
+            //return;
         }
+
+        if(zombieSpawnPoints.Count < numZombies)
+        {
+            Debug.LogError("No hay suficientes puntos de aparición en zombies.");
+            //return;
+        }
+
+        // Instanciar humanos
+        for (int i = 0; i < numHumans; i++)
+        {
+            SpawnPlayer(humanSpawnPoints[i], playerPrefab, connectedClients[i]);
+        }
+
+        // Instanciar zombies
+        for (int i = 0; i < numZombies; i++)
+        {
+            int index = i + numHumans;
+            SpawnPlayer(zombieSpawnPoints[i], zombiePrefab, connectedClients[index]);
+        }
+
+        // Actualizar contadores
+        numberOfHumans = numHumans;
+        numberOfZombies = numZombies;
+        UpdateHumansZombiesClientRpc(numberOfHumans, numberOfZombies);
     }
 
     private void SpawnNonPlayableCharacter(GameObject prefab, Vector3 spawnPosition)

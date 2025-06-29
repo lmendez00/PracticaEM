@@ -37,7 +37,7 @@ public class LevelBuilder : MonoBehaviour
 
     [Header("Room Settings")]
     [Tooltip("Número total de salas")]
-    [SerializeField] private int numberOfRooms = 1;
+    [SerializeField] private int numberOfRooms = 4;
 
     [Tooltip("Ancho de cada sala")]
     [SerializeField] private int roomWidth = 5;
@@ -108,10 +108,12 @@ public class LevelBuilder : MonoBehaviour
                 Vector3 spawnPoint = new Vector3(x + roomWidth / 2, 2, z + roomLength / 2);
                 if (i % 2 == 0 && j % 2 == 0)
                 {
+                    Debug.Log("Hola");
                     humanSpawnPoints.Add(spawnPoint);
                 }
                 else
                 {
+                    Debug.Log("HolaAdios");
                     zombieSpawnPoints.Add(spawnPoint);
                 }
             }
