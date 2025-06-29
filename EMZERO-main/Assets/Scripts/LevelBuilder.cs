@@ -49,7 +49,7 @@ public class LevelBuilder : MonoBehaviour
     [SerializeField] private float ítemsDensity = 20f;
 
     [Tooltip("Densidad de monedas [%]")]
-    [SerializeField] private float coinsDensity = 20f;
+    [SerializeField] public float coinsDensity = 20f;
 
     private readonly float tileSize = 1.0f;
     private Transform roomParent;

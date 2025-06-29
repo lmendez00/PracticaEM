@@ -35,7 +35,7 @@ public class LevelManager : NetworkBehaviour
     public static GameMode gameMode; //Se ha puesto publico porque si no daba problemas a la hora de comprobar el modo de juego
 
     [Tooltip("Tiempo de partida en minutos para el modo tiempo")]
-    [SerializeField] private int minutes = 1;
+    public int minutes = 1;
 
     private List<Vector3> humanSpawnPoints = new List<Vector3>();
     private List<Vector3> zombieSpawnPoints = new List<Vector3>();
@@ -64,7 +64,11 @@ public class LevelManager : NetworkBehaviour
     private PlayerController playerController;
 
     private float remainingSeconds;
+    public static float GlobalRemainingSeconds = -1f;
+
     private bool isGameOver = false;
+
+    public bool modoMedio;
 
     public GameObject gameOverPanel; // Asigna el panel desde el inspector
 
@@ -156,7 +160,15 @@ public class LevelManager : NetworkBehaviour
             }
         }
 
-        remainingSeconds = minutes * 60;
+
+        if (IsServer)
+        {
+            float time = (GlobalRemainingSeconds > 0) ? GlobalRemainingSeconds : minutes * 60;
+            remainingSeconds = time;
+
+            // Enviar a todos los clientes
+            SetRemainingTimeClientRpc(time);
+        }
 
         // Obtener los puntos de aparición y el número de monedas generadas desde LevelBuilder
         if (IsServer && levelBuilder != null)
@@ -586,6 +598,7 @@ public class LevelManager : NetworkBehaviour
         // Implementar la lógica para el modo de juego basado en tiempo
         if (isGameOver) return;
 
+        
         // Decrementar remainingSeconds basado en Time.deltaTime
         remainingSeconds -= Time.deltaTime;
 
@@ -595,6 +608,8 @@ public class LevelManager : NetworkBehaviour
             WinCondition_HumansRpc();
             isGameOver = true;
             remainingSeconds = 0;
+
+            SetRemainingTimeClientRpc(0);
         }
 
         // Convertir remainingSeconds a minutos y segundos
@@ -669,10 +684,36 @@ public class LevelManager : NetworkBehaviour
 
     }
 
+    public void DificultadFacil()
+    {
+        if (IsServer)
+        {
+            GlobalRemainingSeconds = minutes * 60;
+            modoMedio = false;
+        }
+    }
+
+    public void DificultadMedia()
+    {
+        if (IsServer)
+        {
+            Debug.Log("Entra DificultadMedia");
+            GlobalRemainingSeconds = (minutes * 60) * 3;
+            Debug.Log($"tiempo: {GlobalRemainingSeconds}");
+            modoMedio = true;
+        }
+    }
+
+    [ClientRpc]
+    public void SetRemainingTimeClientRpc(float time)
+    {
+        remainingSeconds = time;
+    }
+
     [Rpc(SendTo.ClientsAndHost)]
     public void ResetGameRequestRpc()
     {
-        remainingSeconds = 0;
+        minutes = 1; //Valor por defecto
         CoinsGenerated = 0;
         levelBuilder = null;
         isGameOver = false;

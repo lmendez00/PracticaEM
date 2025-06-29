@@ -1,12 +1,15 @@
 using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 public class MenuManager : NetworkBehaviour
 {
+    public LevelManager levelManager;
     public void Awake()
     {
         Time.timeScale = 1f; // Asegúrate de que el tiempo está restaurado al cargar la escena
+         levelManager = GetComponent<LevelManager>();
     }
 
     public void StartGame()
@@ -52,6 +55,7 @@ public class MenuManager : NetworkBehaviour
         }
         NetworkManager.Singleton.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
+
 
     public void QuitGame()
     {
