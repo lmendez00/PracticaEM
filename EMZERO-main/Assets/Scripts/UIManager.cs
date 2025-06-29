@@ -2,6 +2,7 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class UIManager : NetworkBehaviour
 {
@@ -23,7 +24,7 @@ public class UIManager : NetworkBehaviour
         }
     }
 
-    /*public void CrearPartida()
+    public void CrearPartida()
     {
         m_NetworkManager.StartHost();
 
@@ -35,14 +36,10 @@ public class UIManager : NetworkBehaviour
     public void EntrarPartida()
     {
         m_NetworkManager.StartClient();
-
-        //Entrar en el menú, pero dejar claro que es como cliente, antes de eso hay que hacer que ponga el código (en esta misma escena se puede hacer)
-        //m_NetworkManager.SceneManager.LoadScene("MenuScene", LoadSceneMode.Single);
-
     }
-    */
 
-    
+
+    /*
     void OnGUI()
     {
         GUILayout.BeginArea(new Rect(10, 10, 300, 300));
@@ -52,7 +49,7 @@ public class UIManager : NetworkBehaviour
         }
         else
         {
-            StatusLabels();
+            //StatusLabels();
         }
 
         GUILayout.EndArea();
@@ -81,4 +78,5 @@ public class UIManager : NetworkBehaviour
         GUILayout.Label("Mode: " + mode);
     }
     
+    */
 }

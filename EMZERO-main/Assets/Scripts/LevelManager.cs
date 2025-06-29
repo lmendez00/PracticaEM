@@ -160,6 +160,7 @@ public class LevelManager : NetworkBehaviour
         // Obtener los puntos de aparición y el número de monedas generadas desde LevelBuilder
         if (IsServer && levelBuilder != null)
         {
+            Debug.Log($"Gamemode en builder: {gameMode}");
             levelBuilder.generateCoins = (gameMode == GameMode.Monedas);
 
             levelBuilder.Build();
@@ -182,13 +183,14 @@ public class LevelManager : NetworkBehaviour
 
     private void Update()
     {
+        Debug.Log($"Gamemode en update: {gameMode}");
         if (gameMode == GameMode.Tiempo)
         {
 
             // Lógica para el modo de juego basado en tiempo
             HandleTimeLimitedGameMode();
             
-}
+        }
         else if (gameMode == GameMode.Monedas)
         {
             // Lógica para el modo de juego basado en monedas
@@ -586,7 +588,6 @@ public class LevelManager : NetworkBehaviour
 
         // Decrementar remainingSeconds basado en Time.deltaTime
         remainingSeconds -= Time.deltaTime;
-        Debug.Log($"Quedan {remainingSeconds} segundos");
 
         // Comprobar si el tiempo ha llegado a cero
         if (remainingSeconds <= 0)
@@ -603,7 +604,7 @@ public class LevelManager : NetworkBehaviour
         // Actualizar el texto de la interfaz de usuario
         if (gameModeText != null)
         {
-            Debug.Log($"Entra en gameModeText de Tiempo, minutos {minutesRemaining} segundos{secondsRemaining}");
+            //Debug.Log($"Entra en gameModeText de Tiempo, minutos {minutesRemaining} segundos{secondsRemaining}");
             gameModeText.text = $"{minutesRemaining:D2}:{secondsRemaining:D2}";
         }
 
@@ -649,7 +650,8 @@ public class LevelManager : NetworkBehaviour
         Cursor.visible = false; // Oculta el cursor
 
         // Cargar la escena del menú principal
-        SceneManager.LoadScene("MenuScene"); // Cambia "MenuScene" por el nombre de tu escena principal
+        SceneManager.LoadScene("MenuScene");
+
     }
 
     [Rpc(SendTo.ClientsAndHost)]
