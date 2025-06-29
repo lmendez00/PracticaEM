@@ -10,6 +10,7 @@ public class GameManager : NetworkBehaviour
 
     public NetworkVariable<int> TotalCoinsCollected = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public NetworkVariable<int> PlayersConnected = new(writePerm: NetworkVariableWritePermission.Server);
+    public NetworkVariable<GameMode> CurrentGameMode = new(writePerm: NetworkVariableWritePermission.Server);
 
     private void Awake()
     {

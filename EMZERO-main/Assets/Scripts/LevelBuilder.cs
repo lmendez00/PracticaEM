@@ -108,12 +108,10 @@ public class LevelBuilder : MonoBehaviour
                 Vector3 spawnPoint = new Vector3(x + roomWidth / 2, 2, z + roomLength / 2);
                 if (i % 2 == 0 && j % 2 == 0)
                 {
-                    Debug.Log("Hola");
                     humanSpawnPoints.Add(spawnPoint);
                 }
                 else
                 {
-                    Debug.Log("HolaAdios");
                     zombieSpawnPoints.Add(spawnPoint);
                 }
             }

@@ -89,6 +89,7 @@ public class LevelManager : NetworkBehaviour
 
     private void Start()
     {
+        gameMode = GameManager.Instance.CurrentGameMode.Value;
         Debug.Log("Iniciando el nivel");
         // Buscar el objeto "CanvasPlayer" en la escena
         GameObject canvas = GameObject.Find("CanvasPlayer");
@@ -501,7 +502,7 @@ public class LevelManager : NetworkBehaviour
         int numZombies = totalPlayers - numHumans; // Igual o uno más que humanos
 
         // Obtener puntos de spawn
-        if (humanSpawnPoints.Count < numHumans)
+        /*if (humanSpawnPoints.Count < numHumans)
         {
             Debug.LogError("No hay suficientes puntos de aparición en humanos.");
             //return;
@@ -511,12 +512,11 @@ public class LevelManager : NetworkBehaviour
         {
             Debug.LogError("No hay suficientes puntos de aparición en zombies.");
             //return;
-        }
-
+        }*/
         // Instanciar humanos
         for (int i = 0; i < numHumans; i++)
         {
-            SpawnPlayer(humanSpawnPoints[i], playerPrefab, connectedClients[i]);
+            SpawnPlayer(humanSpawnPoints[0], playerPrefab, connectedClients[i]);
         }
 
         // Instanciar zombies
@@ -680,6 +680,7 @@ public class LevelManager : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     public void WinCondition_ZombiesRpc(ulong id)
     {
+        /*
         Debug.Log("Ganan los zombies!");
 
         var jugadores = GameObject.FindGameObjectsWithTag("Player");
@@ -705,6 +706,31 @@ public class LevelManager : NetworkBehaviour
 
                 ShowGameOverPanel();
             }
+        }*/
+        Debug.Log("Ganan los zombies!");
+
+        var jugadores = GameObject.FindGameObjectsWithTag("Player");
+
+        foreach (var jugador in jugadores)
+        {
+            var pc = jugador.GetComponent<PlayerController>();
+            if (pc == null || !pc.IsOwner) continue;
+
+            // Mostrar el mensaje correcto basado en el estado del jugador
+            if (pc.isZombie && pc.zombificados.Value)
+            {
+                semiWinText.enabled = true;
+            }
+            else if (pc.isZombie)
+            {
+                winTextZombies.enabled = true;
+            }
+            else
+            {
+                defeatTextHumans.enabled = true;
+            }
+
+            ShowGameOverPanel();
         }
     }
 

@@ -13,12 +13,19 @@ public class MenuManager : NetworkBehaviour
     {
         var allPlayers = GameObject.FindGameObjectsWithTag("Player");
 
+        if (NetworkManager.Singleton.IsHost && NetworkManager.Singleton.ConnectedClients.Count <= 1)
+        {
+            //Bloquea el inicio si sólo está el host
+            Debug.Log("Debes esperar a que al menos un cliente se conecte antes de empezar");
+            return;
+        }
+
         foreach (var player in allPlayers)
         {
             player.GetComponent<NetworkObject>().Despawn();
         }
 
-        LevelManager.gameMode = GameMode.Monedas;
+        GameManager.Instance.CurrentGameMode.Value = GameMode.Monedas;
         NetworkManager.Singleton.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
@@ -26,13 +33,19 @@ public class MenuManager : NetworkBehaviour
     {
         var allPlayers = GameObject.FindGameObjectsWithTag("Player");
 
-        foreach (var player in allPlayers)
+        if (NetworkManager.Singleton.IsHost && NetworkManager.Singleton.ConnectedClients.Count <= 1)
+        {
+            //Bloquea el inicio si sólo está el host
+            Debug.Log("Debes esperar a que al menos un cliente se conecte antes de empezar");
+            return;
+        }
+            foreach (var player in allPlayers)
         {
             player.GetComponent<NetworkObject>().Despawn();
         }
 
         //GameMode gameMode = GameMode.Tiempo;
-        LevelManager.gameMode = GameMode.Tiempo;
+        GameManager.Instance.CurrentGameMode.Value = GameMode.Tiempo;
         if (LevelManager.gameMode == GameMode.Tiempo)
         {
             Debug.Log("El modo tiempo esta activo");
