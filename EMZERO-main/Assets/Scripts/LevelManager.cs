@@ -161,7 +161,7 @@ public class LevelManager : NetworkBehaviour
         // Obtener los puntos de aparición y el número de monedas generadas desde LevelBuilder
         if (IsServer && levelBuilder != null)
         {
-            Debug.Log($"Gamemode en builder: {gameMode}");
+            //Debug.Log($"Gamemode en builder: {gameMode}");
             levelBuilder.generateCoins = (gameMode == GameMode.Monedas);
 
             levelBuilder.Build();
@@ -184,7 +184,7 @@ public class LevelManager : NetworkBehaviour
 
     private void Update()
     {
-        Debug.Log($"Gamemode en update: {gameMode}");
+        //Debug.Log($"Gamemode en update: {gameMode}");
         if (gameMode == GameMode.Tiempo)
         {
 
@@ -625,7 +625,7 @@ public class LevelManager : NetworkBehaviour
             {
                 // Tener en cuenta si algun jugador se ha desconectado
                 WinCondition_HumansRpc();
-                //OYE a lo mejor hay que añadir: isGameOver = true;
+                isGameOver = true;
             }
         }
     }
@@ -645,19 +645,46 @@ public class LevelManager : NetworkBehaviour
 
     public void ReturnToMainMenu()
     {
+        /*
         // Gestión del cursor
         Cursor.lockState = CursorLockMode.Locked; // Bloquea el cursor
         Cursor.visible = false; // Oculta el cursor
 
         // Cargar la escena del menú principal
         SceneManager.LoadScene("MenuScene");
+        */
 
+        ResetGameRequestRpc(); // Resetea el GameManager
+        if (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsServer)
+        {
+            var allPlayers = GameObject.FindGameObjectsWithTag("Player");
+            foreach (var player in allPlayers)
+            {
+                player.GetComponent<NetworkObject>().Despawn();
+            }
+            NetworkManager.Singleton.SceneManager.LoadScene("MenuScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+        }
+        //NetworkManager.Singleton.SceneManager.LoadScene("MenuScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void ResetGameRequestRpc()
+    {
+        remainingSeconds = 0;
+        CoinsGenerated = 0;
+        levelBuilder = null;
+        isGameOver = false;
+        numberOfHumans = 0;
+        numberOfZombies = 0;
+        Debug.Log("Juego reiniciado");
     }
 
     [Rpc(SendTo.ClientsAndHost)]
     public void WinCondition_HumansRpc()
     {
-        Debug.Log("Ganan los humanos!");
+        //Debug.Log("Ganan los humanos!");
 
         var allPlayers = GameObject.FindGameObjectsWithTag("Player");
 
@@ -722,6 +749,7 @@ public class LevelManager : NetworkBehaviour
             if (pc.isZombie && pc.zombificados.Value)
             {
                 semiWinText.enabled = true;
+                winTextZombies.enabled = false;
             }
             else if (pc.isZombie)
             {

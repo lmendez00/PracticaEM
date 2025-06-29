@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -76,6 +77,8 @@ public class GameManager : NetworkBehaviour
         PlayersConnected.Value = NetworkManager.Singleton.ConnectedClients.Count;
         Debug.Log($"Jugador desconectado. Total ahora: {PlayersConnected.Value}");
     }
+
+    
 
     [ClientRpc]
     void NotifyClientsMapReadyClientRpc()
