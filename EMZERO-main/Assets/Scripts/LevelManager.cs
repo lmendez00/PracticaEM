@@ -73,6 +73,8 @@ public class LevelManager : NetworkBehaviour
     public GameObject gameOverPanel; // Asigna el panel desde el inspector
 
 
+
+
     #endregion
 
     #region Unity game loop methods
@@ -677,7 +679,8 @@ public class LevelManager : NetworkBehaviour
             {
                 player.GetComponent<NetworkObject>().Despawn();
             }
-            NetworkManager.Singleton.SceneManager.LoadScene("MenuScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+            //NetworkManager.Singleton.SceneManager.LoadScene("MenuScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+            CleanupAndReturnToMenu();
         }
         //NetworkManager.Singleton.SceneManager.LoadScene("MenuScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
 
@@ -803,6 +806,28 @@ public class LevelManager : NetworkBehaviour
 
             ShowGameOverPanel();
         }
+    }
+
+    public void CleanupAndReturnToMenu()
+    {
+        if (!IsServer) return;
+        var gameManager = FindObjectOfType<GameManager>();
+
+        //Limpiar network objects
+        foreach (var netObj in NetworkManager.Singleton.SpawnManager.SpawnedObjectsList.ToList())
+        {
+            if (netObj != null && netObj.IsSpawned)
+            {
+                if (netObj != null && netObj.gameObject != gameManager.gameObject) //No destruir el GameManager
+                {
+                    netObj.Despawn();
+                    Destroy(netObj.gameObject);
+                }
+                
+            }
+        }
+        //Cargar menu
+        NetworkManager.SceneManager.LoadScene("MenuScene", LoadSceneMode.Single);
     }
 
     #endregion
